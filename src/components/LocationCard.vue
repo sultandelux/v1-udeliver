@@ -2,8 +2,8 @@
   <div class="text-center">
     <v-card class="location-card">
       <v-form class="container">
-       <ShowMapPickup/>
-       <ShowMapDestination />
+       <SearchPickup/>
+       <SearchDestination />
         <v-btn
           raised
           small
@@ -16,15 +16,15 @@
 </template>
 
 <script>
-import ShowMapDestination from './ShowMapDestination.vue';
-import ShowMapPickup from './ShowMapPickup.vue';
+import SearchPickup from './SearchPickup.vue';
+import SearchDestination from './SearchDestination.vue';
 
 export default {
   name: 'LocationCard',
   props: ['pickupLocation', 'destinationLocation'],
   components: {
-    ShowMapDestination,
-    ShowMapPickup
+    SearchDestination,
+    SearchPickup
   },
   data () {
     return {
@@ -32,12 +32,11 @@ export default {
     }
   },
   mounted() {
-            console.log('mounted locationcard')
+    console.log('mounted locationcard')
 
-    },
+  },
   updated() {
-            console.log('show locationCard')
-
+    console.log('show locationCard')
   },
   beforeDestroy(){
     console.log('beforeDestroyed')
@@ -47,7 +46,7 @@ export default {
   },
   methods: {
        
-      }
+    }
   }
 </script>
 
@@ -59,7 +58,7 @@ export default {
   bottom: 1px;
   margin-left: 20px;
   z-index: 99;
-  width: 370px;
+  width: 330px;
 
   .v-form {
     padding-top: 5px;

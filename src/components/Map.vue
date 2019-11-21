@@ -2,23 +2,8 @@
 <template>
  <div class="mapcontainer">
     <LocationCard
-      :pickupLocation="pickupLocation"
-      :destinationLocation="destinationLocation"
+      :pickupLocation="pickup"
     />
-        <!-- <v-btn-toggle
-          tile
-          color="deep-purple accent-3"
-          group
-        >
-          <v-btn 
-          v-on:click="panTo"
-          value="panto">
-            panto
-          </v-btn>
-          <v-btn value="navigate">
-            navigate
-          </v-btn>
-        </v-btn-toggle> -->
     <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh;">
         <v-layout justify-center align-center column pa-5>
             <div id="map"></div>
@@ -32,6 +17,8 @@
 import LocationCard from '@/components/LocationCard';
 import Courier from '@/components/Courier/Courier'
 import gMap from '2gis-maps'
+import { mapGetters, mapMutations } from 'vuex';
+
 export default {
     /* eslint-disable */
     name: 'mapcontainer',
@@ -46,24 +33,21 @@ export default {
         markerLocation: null,
         errorStr:null,
         map: null,
-        pickupLocation: {
-            lat: 0,
-            lng: 0,
-            name: ''
-        },
-        destinationLocation: {
-            lat: 0,
-            lng: 0,
-            name: ''
-        },
+    
     }},
     computed: {
+        ...mapGetters(['pickup', 'latlng'])
     },
     watch: {
+        pickup: function(){
+            this.markerLocation.setLatLng(this.latlng)
+            this.map.setView(this.latlng, 17, {'animate': true, 'noMoveStart': true})
+        }
     },
     created() {
     },
     mounted() {
+        console.log('pickup', this.pickup)
         const DG = require('2gis-maps');
         const map = DG.map('map', {
                 'center': this.center,
@@ -72,26 +56,7 @@ export default {
                 'fullscreenControl': false,
         })
         map.locate({setView: true, watch: true})
-            .on('locationfound', function(e){ 
-                const radius = e.accuracy / 5;
-                const radiusPoint = radius / 10;
-                const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map);
-                const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map);
-                const zoomLocation = {
-                    start:  map.getZoom(),
-                    end: map.getZoom()
-                };
-                map.on('zoomstart', function(e) { zoomLocation.start = map.getZoom() })
-                map.on('zoomend', function(e) {
-                    zoomLocation.end = map.getZoom()
-                    const diff = zoomLocation.start - zoomLocation.end
-                    if (diff > 0) {
-                        circlePoint.setRadius(circlePoint.getRadius() * 1.8);
-                    } else if (diff < 0) {
-                        circlePoint.setRadius(circlePoint.getRadius() / 1.8);
-                    }
-                })
-            })
+            .on('locationfound', DG.bind(onLocate, this))
             .on('locationerror', function(e) {
                 console.log(e)
                 DG.popup()
@@ -100,17 +65,41 @@ export default {
                     .openOn(map);
                 map.locate({setView: true, watch: true})
             });
+        function onLocate(e){ 
+            const radius = e.accuracy / 5;
+            const radiusPoint = radius / 10;
+            const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map);
+            const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map);
+            const zoomLocation = {
+                start:  map.getZoom(),
+                end: map.getZoom()
+            };
+            map.on('zoomstart', function(e) { zoomLocation.start = map.getZoom() })
+            map.on('zoomend', function(e) {
+                zoomLocation.end = map.getZoom()
+                const diff = zoomLocation.start - zoomLocation.end
+                if (diff > 0) {
+                    circlePoint.setRadius(circlePoint.getRadius() * 1.8);
+                } else if (diff < 0) {
+                    circlePoint.setRadius(circlePoint.getRadius() / 1.8);
+                }
+            })
+            const lat = map.getCenter().lat
+            const lng = map.getCenter().lng
+            this.findNameDestination(lat, lng)
+        }
+        const lat = map.getCenter().lat
+        const lng = map.getCenter().lng
 
         DG.control.location({position: 'topright'}).addTo(map);
         const iconLocation = DG.icon({
             iconUrl: require('../assets/location.png'),
             iconSize: [30, 30],
         });
-        const lat = map.getCenter().lat
-        const lng = map.getCenter().lng
+       
 
         //sets pickup marker 
-        const markerLocation = DG.marker([43.238475, 76.931361], { icon: iconLocation})
+        const markerLocation = DG.marker([lat, lng], { icon: iconLocation})
             .addTo(map)
         this.map = map
         this.markerLocation = markerLocation
@@ -131,20 +120,24 @@ export default {
 
         // finds a new address when moveend
         function onMoveend(e) {
-            markerLocation.bindLabel("loading...", 
+            markerLocation.bindLabel(this.pickup, 
             { 
                 static: true, 
                 offset: [-90, -60],
                 textDirection: 'auto'
             })
             this.findName()
-        }        
+        }      
+  
     },
     updated() {
-        //searches for address name
-        if (this.pickupLocation.name) {
-            console.log('this.pickupLocation.name', this.pickupLocation.name)
-            this.markerLocation.bindLabel(this.pickupLocation.name, 
+        navigator.geolocation.getCurrentPosition(
+            function(response){ console.log(response)},
+            function(error)   { console.error(error)},
+            {timeout: 1000*60, enableHighAccuracy: true, maximumAge: 1000*60*60} 
+        )
+        if (this.pickup) {
+            this.markerLocation.bindLabel(this.pickup, 
             { 
                 static: true, 
                 offset: [-90, -60],
@@ -153,14 +146,8 @@ export default {
         }
     },
     methods: {
-        setLocationMarker: function (lat, lng) {
-            
-        },
+        ...mapMutations(['setPickup', 'setDestination']),
         findName: function() {
-            if (this.pickupLocation.name === '') {
-                this.pickupLocation.lat = this.location.lat;
-                this.pickupLocation.lng = this.location.lng;
-            }
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
             fetch(url)
@@ -173,24 +160,30 @@ export default {
                         splittedAddress[0].trim() +
                         ', ' +
                         splittedAddress[2].trim();
-                    this.pickupLocation = {
-                        lat: this.markerLocation.getLatLng().lat,
-                        lng: this.markerLocation.getLatLng().lng,
-                        name: address
-                    };
+
+                    const lat = this.markerLocation.getLatLng().lat
+                    const lng = this.markerLocation.getLatLng().lng
+                    this.setPickup({address, lat, lng})
                 });
         },
-        panTo: function () {
-            this.map.panTo(this.center, {animate: true})
+        findNameDestination(lat, lng){
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+            const proxyurl = "https://cors-anywhere.herokuapp.com/";
+            fetch(url)
+                .then(data => data.json())
+                .then(location => {
+                    const splittedAddress = location.display_name.split(',');
+                    const address =
+                        splittedAddress[1].trim() +
+                        ' ' +
+                        splittedAddress[0].trim() +
+                        ', ' +
+                        splittedAddress[2].trim();
+                    this.setDestination({address, lat, lng})
+                });
         },
-        buildNavigation() {
-        },
-        makeSuggests() {
-        },
-        showCouriers() {
-        },
-        }
     }
+}
 </script>
 
 <style scoped>
@@ -205,9 +198,6 @@ export default {
     position: absolute !important; 
     z-index: 9; 
 }
-/* .button {
-    z-index: 99;
-} */
 .leaflet-marker-icon {
     position: absolute;
 }

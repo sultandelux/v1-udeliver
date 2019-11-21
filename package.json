@@ -42,6 +42,7 @@
       "vue/no-unused-components": "off",
       "no-unused-vars": "off",
       "no-console": "off",
+      "no-inner-declarations": "off",
       "no-restricted-syntax": [
         "error",
         {
