@@ -15,7 +15,6 @@ export default {
   },
   data () {
     return {
-      openMapPickup: false,
       center: [43.238475, 76.911361],
     }
   },
@@ -35,12 +34,11 @@ export default {
             textDirection: 'auto'
         })
         this.markerLocation.setLatLng(this.latlng)
-        this.map.setView(this.latlng, 17, {'animate': true, 'noMoveStart': true})
+        this.map.setView(this.latlng)
       }
   },
   mounted() {
     console.log('showmap mounted')
-    console.log('loaded', this.loaded)
 
     if(document.getElementById("showMap")){
         // document.getElementById('showMap').innerHTML = "<div id='map' style='width: 100%; height: 100%;'></div>";
@@ -54,7 +52,7 @@ export default {
             'fullscreenControl': false,
         })
 
-        // DG.control.location({position: 'topright'}).addTo(map);
+        DG.control.location({position: 'topright'}).addTo(map);
         
         const lat = map.getCenter().lat
         const lng = map.getCenter().lng

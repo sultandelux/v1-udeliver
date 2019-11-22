@@ -1,0 +1,129 @@
+<template>
+    <div id="navigation"></div>
+</template>
+
+<script>
+import { mapGetters, mapMutations } from 'vuex';
+import { config } from '../../config';
+
+const DG = require('2gis-maps');
+
+export default {
+  props: ['loaded'],
+  name: 'navigation',
+  test: null,
+  
+  components: {
+  },
+  data () {
+    return {
+        center: [43.238475, 76.911361],
+        polyline: {
+            latLngs: [],
+            color: 'green'
+        },
+    }
+  },
+  computed: {
+    ...mapGetters(['pickup', 'latlng']),
+    ...mapGetters(['destination', 'latlngDestination'])
+
+  },
+  created(){
+    console.log('navigation created')
+  },
+  watch: {
+      polyline: function(){
+        // const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
+        console.log('changed')
+      },
+  },
+  mounted() {
+    console.log('navigation mounted')
+
+    if(document.getElementById("navigation")){
+
+        
+        const map = DG.map('navigation', {
+            'center': this.center,
+            'zoom': 12,
+            'zoomControl': false,
+            'fullscreenControl': false,
+        })
+
+        DG.control.location({position: 'topright'}).addTo(map);
+        
+        this.map = map
+        this.setNavigation()
+        console.log('polyline mounted', this.polyline.latLngs)
+        if(this.polyline.latLngs){
+            const polyline = DG.polyline(this.polyline.latLngs).addTo(map)
+        }
+
+    }
+  },
+  updated() {
+        console.log('polyline updated', this.polyline.latLngs)
+        const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
+  },
+  beforeDestroy(){
+    console.log('navigation before destroy')
+
+  },
+  destroyed(){
+    console.log('navigation destroyed')
+  },
+  methods: {
+      ...mapMutations(['setDestination']),  
+      setNavigation(){
+        const DG = require('2gis-maps');
+
+          if (this.latlng[0] != 0 && this.latlngDestination[0] != 0) {
+        fetch(
+          'https://api.openrouteservice.org/directions?api_key=' +
+            config.API_KEY +
+            '&coordinates=' +
+            this.latlng[1] +
+            ',' +
+            this.latlng[0] +
+            '|' +
+            this.latlngDestination[1] +
+            ',' +
+            this.latlngDestination[0] +
+            '&profile=driving-car&geometry=true&geometry_format=polyline'
+        )
+          .then(data => data.json())
+          .then(jsonData => {
+            this.polyline.latLngs = [];
+            jsonData.routes[0].geometry.forEach(geo => {
+              const latLng = DG.latLng(geo[0], geo[1]);
+              this.polyline.latLngs.push([latLng.lng, latLng.lat]);
+            });
+            console.log('polyline', this.polyline.latLngs)
+            const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
+            this.map.fitBounds(this.polyline.latLngs)
+          });
+        }
+      }
+    }
+}
+</script>
+
+<style lang="scss">
+.list {
+  height: 370px;
+}
+.loadDiv{
+    width: 100%;
+    height: 100%;
+}
+#navigation {
+    width: 100%;
+    height: 100%;
+    position: absolute !important; 
+    z-index: 9; 
+}
+.leaflet-marker-icon {
+    position: absolute;
+}
+</style>

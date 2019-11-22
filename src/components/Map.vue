@@ -41,20 +41,27 @@ export default {
     watch: {
         pickup: function(){
             this.markerLocation.setLatLng(this.latlng)
-            this.map.setView(this.latlng, 17, {'animate': true, 'noMoveStart': true})
+            this.map.setView(this.latlng)
         }
     },
     created() {
+            console.log('Map created')
+            this.startLocation()
+
     },
     mounted() {
+        
         console.log('pickup', this.pickup)
+        console.log('Map mounted')
         const DG = require('2gis-maps');
-        const map = DG.map('map', {
-                'center': this.center,
-                'zoom': 12,
-                'zoomControl': false,
-                'fullscreenControl': false,
-        })
+        if (this.map == null){
+            var map = DG.map('map', {
+                    'center': this.center,
+                    'zoom': 12,
+                    'zoomControl': false,
+                    'fullscreenControl': false,
+            })
+        }
         map.locate({setView: true, watch: true})
             .on('locationfound', DG.bind(onLocate, this))
             .on('locationerror', function(e) {
@@ -86,7 +93,7 @@ export default {
             })
             const lat = map.getCenter().lat
             const lng = map.getCenter().lng
-            this.findNameDestination(lat, lng)
+            this.setInitial(lat, lng)
         }
         const lat = map.getCenter().lat
         const lng = map.getCenter().lng
@@ -127,15 +134,25 @@ export default {
                 textDirection: 'auto'
             })
             this.findName()
-        }      
+        }  
+        if (this.pickup) {
+            this.markerLocation.bindLabel(this.pickup, 
+            { 
+                static: true, 
+                offset: [-90, -60],
+                textDirection: 'auto'
+            });
+            this.markerLocation.setLatLng(this.latlng)
+            this.map.setView(this.latlng, 17)
+
+
+        }    
   
     },
     updated() {
-        navigator.geolocation.getCurrentPosition(
-            function(response){ console.log(response)},
-            function(error)   { console.error(error)},
-            {timeout: 1000*60, enableHighAccuracy: true, maximumAge: 1000*60*60} 
-        )
+        console.log('Map updated')
+
+        this.startLocation()
         if (this.pickup) {
             this.markerLocation.bindLabel(this.pickup, 
             { 
@@ -146,7 +163,7 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(['setPickup', 'setDestination']),
+        ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
@@ -179,9 +196,34 @@ export default {
                         splittedAddress[0].trim() +
                         ', ' +
                         splittedAddress[2].trim();
+                    console.log('destionation set', address, lat, lng)
                     this.setDestination({address, lat, lng})
                 });
         },
+        setInitial(lat, lng){
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+            const proxyurl = "https://cors-anywhere.herokuapp.com/";
+            fetch(url)
+                .then(data => data.json())
+                .then(location => {
+                    const splittedAddress = location.display_name.split(',');
+                    const address =
+                        splittedAddress[1].trim() +
+                        ' ' +
+                        splittedAddress[0].trim() +
+                        ', ' +
+                        splittedAddress[2].trim();
+                    console.log('setInitial', address, lat, lng)
+                    this.setInitialLocation({address, lat, lng})
+                });
+        },
+        async startLocation() { 
+            await navigator.geolocation.getCurrentPosition(
+                function(response){ console.log(response)},
+                function(error)   { console.error(error)},
+                {timeout: 1000*60, enableHighAccuracy: true, maximumAge: 1000*60*60} 
+            )
+        }
     }
 }
 </script>

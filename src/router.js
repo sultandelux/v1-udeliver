@@ -7,6 +7,7 @@ import Login from './views/Login'
 import Register from './views/Register'
 import Information from './views/Information'
 import Mapcontainer from './components/Map'
+import Navigation from './components/Navigation/Navigation'
 // import ShowMapPickup from './components/ShowMapPickup'
 Vue.use(Router);
 
@@ -19,11 +20,11 @@ const router = new Router({
             name: 'mapcontainer',
             component: Mapcontainer
         },
-        // {
-        //     path: '/showmappickup',
-        //     name: 'showmappickup',
-        //     component: ShowMapPickup
-        // },
+        {
+            path: '/navigation',
+            name: 'navigation',
+            component: Navigation
+        },
         {
             path: '/profile',
             name: 'profile',

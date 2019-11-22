@@ -9,6 +9,8 @@
           small
           color="info"
           block
+          to="/navigation"
+          :disabled="pickup == '' || destination == '' || pickup == destination"
         >Search for courier</v-btn>
       </v-form>
     </v-card>
@@ -18,6 +20,7 @@
 <script>
 import SearchPickup from './SearchPickup.vue';
 import SearchDestination from './SearchDestination.vue';
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'LocationCard',
@@ -30,6 +33,9 @@ export default {
     return {
      
     }
+  },
+  computed: {
+    ...mapGetters(['pickup', 'destination'])
   },
   mounted() {
     console.log('mounted locationcard')
@@ -45,7 +51,9 @@ export default {
     console.log('destroyed')
   },
   methods: {
-       
+       setNavigation(){
+
+       }
     }
   }
 </script>

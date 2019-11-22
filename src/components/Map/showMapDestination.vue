@@ -20,6 +20,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['initialLocation', 'latlngInitial']),
     ...mapGetters(['destination', 'latlngDestination'])
 
   },
@@ -36,12 +37,11 @@ export default {
             textDirection: 'auto'
         })
         this.markerLocation.setLatLng(this.latlngDestination)
-        this.map.setView(this.latlngDestination, 17, {'animate': true, 'noMoveStart': true})
-      }
+        this.map.setView(this.latlngDestination)
+      },
   },
   mounted() {
     console.log('showMapDestination mounted')
-    console.log('loaded', this.loaded)
 
     if(document.getElementById("showMapDestination")){
         // document.getElementById('showMapDestination').innerHTML = "<div id='map' style='width: 100%; height: 100%;'></div>";
@@ -55,7 +55,7 @@ export default {
             'fullscreenControl': false,
         })
 
-        // DG.control.location({position: 'topright'}).addTo(map);
+        DG.control.location({position: 'topright'}).addTo(map);
         
         const lat = map.getCenter().lat
         const lng = map.getCenter().lng
@@ -64,8 +64,9 @@ export default {
             iconUrl: require('../../assets/location.png'),
             iconSize: [30, 30],
         });
-        //sets destination marker 
-        const markerLocation = DG.marker(this.latlngDestination, { icon: iconLocation})
+
+        const markerLocation = DG.marker(this.latlngDestination, 
+            { icon: iconLocation})
             .addTo(this.map)
         this.markerLocation = markerLocation
         let markerLocationCoord = this.markerLocation.getLatLng()
@@ -81,7 +82,7 @@ export default {
 
         // finds a new address when moveend
         function onMoveend(e) {
-            markerLocation.bindLabel(this.destination, 
+            markerLocation.bindLabel(this.destination ? this.destination : this.initialLocation, 
             { 
                 static: true, 
                 offset: [-90, -60],
@@ -90,14 +91,22 @@ export default {
             this.findName()
         } 
         if (this.destination) {
-        this.markerLocation.bindLabel(this.pickup, 
-        { 
-            static: true, 
-            offset: [-90, -60],
-            textDirection: 'auto'
-        })
-        this.map.setView(this.latlngDestination, 17, {'animate': true, 'noMoveStart': true})
-     }
+            this.markerLocation.bindLabel(this.destination, 
+            { 
+                static: true, 
+                offset: [-90, -60],
+                textDirection: 'auto'
+            })
+            this.map.setView(this.latlngDestination, 17, {'animate': true, 'noMoveStart': true})
+        } else {
+            this.markerLocation.bindLabel(this.initialLocation, 
+            { 
+                static: true, 
+                offset: [-90, -60],
+                textDirection: 'auto'
+            })
+            this.map.setView(this.latlngInitial, 17, {'animate': true, 'noMoveStart': true})
+        }
     }
   },
   updated() {

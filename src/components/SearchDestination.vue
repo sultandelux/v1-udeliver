@@ -5,7 +5,7 @@
           label="Your destination"
           required
           @focus="dialogDestination = true"
-          :value="destination"
+          :value="destionationAddress"
     >
         </v-text-field>
     </template>
@@ -16,7 +16,7 @@
           label="Your destination"
           required
           editable
-          :value="destination"
+          :value="destionationAddress"
         >
         </v-text-field>
           <v-btn text color='green' small @click="openMapDestination = true">Show on map</v-btn>
@@ -84,8 +84,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['destination'])
-
+    ...mapGetters(['destination']),
+    ...mapGetters(['initialLocation']),
+    destionationAddress: function(){
+      return this.destination == this.initialLocation ? '' : this.destination
+    }
   },
   created(){
     console.log('SearchDestination created')
@@ -95,7 +98,6 @@ export default {
   
   mounted() {
     console.log('SearchDestination mounted')
-
 
   },
   updated() {
