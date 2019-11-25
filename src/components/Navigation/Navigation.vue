@@ -101,7 +101,18 @@ export default {
             });
             console.log('polyline', this.polyline.latLngs)
             const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
+            const iconPickup = DG.icon({
+                iconUrl: require('../../assets/location.png'),
+                iconSize: [30, 30],
+            });
+            const iconDestination = DG.icon({
+                iconUrl: require('../../assets/destination.png'),
+                iconSize: [30, 30],
+            });
+            const pickupMarker = DG.marker(this.latlng,  { icon: iconPickup}).addTo(this.map)
+            const destinationMarker = DG.marker(this.latlngDestination,  { icon: iconDestination}).addTo(this.map)
             this.map.fitBounds(this.polyline.latLngs)
+            // this.map.setZoom(this.map.getZoom() - 0.2)
           });
         }
       }

@@ -18,6 +18,18 @@ import LocationCard from '@/components/LocationCard';
 import Courier from '@/components/Courier/Courier'
 import gMap from '2gis-maps'
 import { mapGetters, mapMutations } from 'vuex';
+import carMarkerUrl from '@/assets/car-marker.png';
+import selectedCarMarkerUrl from '@/assets/selected-car-marker.png';
+import { config } from '@/config'
+
+const carMarkerIcon = L.icon({
+  iconUrl: carMarkerUrl,
+  iconSize: [38, 38]
+});
+const selectedCarMarkerIcon = L.icon({
+  iconUrl: selectedCarMarkerUrl,
+  iconSize: [38, 38]
+});
 
 export default {
     /* eslint-disable */
@@ -28,20 +40,67 @@ export default {
     },
     data() {
         return {
-        center: [43.238475, 76.911361],
-        location: null,
-        markerLocation: null,
-        errorStr:null,
-        map: null,
-    
+            haveUserLocation: false,
+            center: [43.238475, 76.911361],
+            location: {
+                lat: 43.23848,
+                lng: 76.91133
+            },
+            markerLocation: null,
+            errorStr:null,
+            map: null,
+            couriers: [
+                {
+                    id: 0,
+                    selected: false,
+                    marker: null,
+                    location: {
+                        lat: 43.2385,
+                        lng: 76.91133
+                    },
+                    icon: carMarkerIcon,
+                    fullName: 'Peter Gregon',
+                    courierAddress: '',
+                    pricePerKm: 1.68
+                }
+            ],
+            counter: 0,
+            couriersLatLngs: []
     }},
     computed: {
-        ...mapGetters(['pickup', 'latlng'])
+        ...mapGetters(['pickup', 'latlng']),
+         getValidcouriers() {
+            return this.couriers.filter(courier => courier.location.lat != 0);
+        }
     },
     watch: {
         pickup: function(){
             this.markerLocation.setLatLng(this.latlng)
             this.map.setView(this.latlng)
+                                    console.log('WATCHER PICKUP')
+
+        },
+        counter: function(){
+                        console.log('WATCHER')
+this.couriers.forEach(courier => {
+                if(courier.marker){
+                    courier.marker.setLatLng(courier.location)
+                }
+            })
+
+        },
+        couriersLatLngs: function() {
+            console.log('WATCHER')
+
+        },
+
+        couriers: function(){
+            this.couriers.forEach(courier => {
+                if(courier.marker){
+                    courier.marker.setLatLng(courier.location)
+                }
+            })
+            console.log('WATCHER')
         }
     },
     created() {
@@ -66,11 +125,10 @@ export default {
             .on('locationfound', DG.bind(onLocate, this))
             .on('locationerror', function(e) {
                 console.log(e)
-                DG.popup()
-                    .setLatLng(map.getCenter())
-                    .setContent('location not found')
-                    .openOn(map);
-                map.locate({setView: true, watch: true})
+                // DG.popup()
+                //     .setLatLng(map.getCenter())
+                //     .setContent('location not found')
+                //     .openOn(map);
             });
         function onLocate(e){ 
             const radius = e.accuracy / 5;
@@ -112,10 +170,10 @@ export default {
         this.markerLocation = markerLocation
         let markerLocationCoord = this.markerLocation.getLatLng()
 
-        this.location = {
-            lat: this.markerLocation.getLatLng().lat,
-            lng: this.markerLocation.getLatLng().lng
-        }
+        // this.location = {
+        //     lat: this.markerLocation.getLatLng().lat,
+        //     lng: this.markerLocation.getLatLng().lng
+        // }
         
         this.map.on('move', function (e) {
             const newLatLng = this.getCenter()
@@ -144,10 +202,8 @@ export default {
             });
             this.markerLocation.setLatLng(this.latlng)
             this.map.setView(this.latlng, 17)
-
-
         }    
-  
+        this.setCourier()
     },
     updated() {
         console.log('Map updated')
@@ -163,11 +219,35 @@ export default {
         }
     },
     methods: {
+        setUserLocation(){
+            navigator.geolocation.getCurrentPosition(
+            position => {
+                // this.location = {
+                //     lat: position.coords.latitude,
+                //     lng: position.coords.longitude
+                // };
+                this.haveUserLocation = true;
+            },
+            () => {
+                // Didn't give the location
+                fetch('https://ipapi.co/json')
+                .then(res => res.json())
+                .then(location => {
+                    this.location = {
+                        lat: location.latitude,
+                        lng: location.longitude
+                    };
+                    this.haveUserLocation = true;
+                });
+            },
+            { timeout: 10000 }
+            )
+        },
         ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch(url)
+            fetch(proxyurl + url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',');
@@ -186,7 +266,7 @@ export default {
         findNameDestination(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch(url)
+            fetch(proxyurl + url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',');
@@ -203,7 +283,7 @@ export default {
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch(url)
+            fetch(proxyurl + url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',');
@@ -216,6 +296,76 @@ export default {
                     console.log('setInitial', address, lat, lng)
                     this.setInitialLocation({address, lat, lng})
                 });
+        },
+
+        showcourierInformation(courier) {
+            courier.selected = !courier.selected;
+            courier.icon = courier.selected ? selectedCarMarkerIcon : carMarkerIcon;
+        },
+        setcouriersLocation(index) {
+            this.couriers.forEach(courier => {
+                courier.location = {
+                    lat: this.couriersLatLngs[index][0],
+                    lng: this.couriersLatLngs[index][1]
+                }
+            })
+                            this.counter = index
+            console.log('counter', this.counter, index)
+            console.log('this.couriers.forEach', this.couriers)
+        },
+
+        getRandomRoute(latitude, longitude) {
+            const startCoordinates = this.getRandomLocation(latitude, longitude);
+            const endCoordinates = this.getRandomLocation(latitude, longitude);
+            fetch(
+                'https://api.openrouteservice.org/directions?api_key=' +
+                config.API_KEY +
+                '&coordinates=' +
+                startCoordinates.lng +
+                ',' +
+                startCoordinates.lat +
+                '|' +
+                endCoordinates.lng +
+                ',' +
+                endCoordinates.lat +
+                '&profile=driving-car&geometry=true&geometry_format=polyline'
+                )
+                .then(data => data.json())
+                .then(jsonData => {
+                    jsonData.routes[0].geometry.forEach(geo => {
+                        const latLng = L.latLng(geo[0], geo[1]);
+                        this.couriersLatLngs.push([latLng.lng, latLng.lat]);
+                    })
+                    console.log('couriersLatLngs', this.couriersLatLngs)
+                    this.setcouriersLocation(0);
+                })
+        },
+        getRandomLocation(startLat, startLng) {
+            const maxLat = startLat + 0.01;
+            const minLat = startLat - 0.01;
+            const maxLng = startLng + 0.01;
+            const minLng = startLng - 0.01;
+            return {
+                lat: Math.random() * (maxLat - minLat) + minLat,
+                lng: Math.random() * (maxLng - minLng) + minLng
+            }
+        },
+        setCourier(){ 
+            console.log('this.location', this.location)       
+            this.getRandomRoute(this.location.lat, this.location.lng)
+            let index = 0;
+            setInterval(() => {
+                index++
+                if (index == this.couriersLatLngs.length) {
+                    index = 0;
+                }
+                this.setcouriersLocation(index)
+                this.counter = index
+            }, 5000)
+            this.couriers.forEach(courier => {
+                var courierMarker = DG.marker(courier.location, {icon: carMarkerIcon}).addTo(this.map)
+                courier.marker = courierMarker
+            }) 
         },
         async startLocation() { 
             await navigator.geolocation.getCurrentPosition(
