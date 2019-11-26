@@ -147,12 +147,12 @@ export default {
   height: 370px;
 }
 .loadDiv{
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 90%;
 }
 #showMap {
     width: 100%;
-    height: 100%;
+    height: 95%;
     position: absolute !important; 
     z-index: 9; 
 }

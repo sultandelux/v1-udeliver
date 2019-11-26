@@ -39,8 +39,8 @@
     </v-dialog>
 
     <v-dialog v-model="openMapPickup" fullscreen hide-overlay transition="dialog-bottom-transition" max-width="370px" class="mapLocation">
-      <v-card>
-        <v-toolbar>
+      <v-card class="cardShow">
+        <v-toolbar class="toolbarShow">
           <v-btn icon dark @click="onClose()">
             <v-icon color="black">mdi-close</v-icon>
           </v-btn>

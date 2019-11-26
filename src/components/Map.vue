@@ -1,17 +1,15 @@
-
 <template>
- <div class="mapcontainer">
-    <LocationCard
-      :pickupLocation="pickup"
-    />
-    <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh;">
-        <v-layout justify-center align-center column pa-5>
-            <div id="map"></div>
-        </v-layout>
-    </v-container>
- </div>
+    <div class="mapcontainer">
+        <LocationCard
+        :pickupLocation="pickup"
+        />
+        <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh;">
+            <v-layout justify-center align-center column pa-5>
+                <div id="map"></div>
+            </v-layout>
+        </v-container>
+    </div>
 </template>
-
 <script>
 /* eslint-disable */
 import LocationCard from '@/components/LocationCard';
@@ -25,11 +23,11 @@ import { config } from '@/config'
 const carMarkerIcon = L.icon({
   iconUrl: carMarkerUrl,
   iconSize: [38, 38]
-});
+})
 const selectedCarMarkerIcon = L.icon({
   iconUrl: selectedCarMarkerUrl,
   iconSize: [38, 38]
-});
+})
 
 export default {
     /* eslint-disable */
@@ -77,31 +75,14 @@ export default {
         pickup: function(){
             this.markerLocation.setLatLng(this.latlng)
             this.map.setView(this.latlng)
-                                    console.log('WATCHER PICKUP')
-
         },
         counter: function(){
-                        console.log('WATCHER')
-this.couriers.forEach(courier => {
-                if(courier.marker){
-                    courier.marker.setLatLng(courier.location)
-                }
-            })
-
-        },
-        couriersLatLngs: function() {
-            console.log('WATCHER')
-
-        },
-
-        couriers: function(){
             this.couriers.forEach(courier => {
                 if(courier.marker){
                     courier.marker.setLatLng(courier.location)
                 }
             })
-            console.log('WATCHER')
-        }
+        },
     },
     created() {
             console.log('Map created')
@@ -215,7 +196,7 @@ this.couriers.forEach(courier => {
                 static: true, 
                 offset: [-90, -60],
                 textDirection: 'auto'
-            });
+            })
         }
     },
     methods: {
@@ -238,16 +219,16 @@ this.couriers.forEach(courier => {
                         lng: location.longitude
                     };
                     this.haveUserLocation = true;
-                });
+                })
             },
-            { timeout: 10000 }
+                { timeout: 10000 }
             )
         },
         ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch(proxyurl + url)
+            fetch( url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',');
@@ -266,7 +247,7 @@ this.couriers.forEach(courier => {
         findNameDestination(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch(proxyurl + url)
+            fetch( url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',');
@@ -278,12 +259,12 @@ this.couriers.forEach(courier => {
                         splittedAddress[2].trim();
                     console.log('destionation set', address, lat, lng)
                     this.setDestination({address, lat, lng})
-                });
+                })
         },
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch(proxyurl + url)
+            fetch( url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',');
@@ -295,7 +276,7 @@ this.couriers.forEach(courier => {
                         splittedAddress[2].trim();
                     console.log('setInitial', address, lat, lng)
                     this.setInitialLocation({address, lat, lng})
-                });
+                })
         },
 
         showcourierInformation(courier) {
@@ -309,9 +290,7 @@ this.couriers.forEach(courier => {
                     lng: this.couriersLatLngs[index][1]
                 }
             })
-                            this.counter = index
-            console.log('counter', this.counter, index)
-            console.log('this.couriers.forEach', this.couriers)
+            this.counter = index
         },
 
         getRandomRoute(latitude, longitude) {
@@ -333,10 +312,9 @@ this.couriers.forEach(courier => {
                 .then(data => data.json())
                 .then(jsonData => {
                     jsonData.routes[0].geometry.forEach(geo => {
-                        const latLng = L.latLng(geo[0], geo[1]);
-                        this.couriersLatLngs.push([latLng.lng, latLng.lat]);
+                        const latLng = L.latLng(geo[0], geo[1])
+                        this.couriersLatLngs.push([latLng.lng, latLng.lat])
                     })
-                    console.log('couriersLatLngs', this.couriersLatLngs)
                     this.setcouriersLocation(0);
                 })
         },
@@ -361,7 +339,7 @@ this.couriers.forEach(courier => {
                 }
                 this.setcouriersLocation(index)
                 this.counter = index
-            }, 5000)
+            }, 7000)
             this.couriers.forEach(courier => {
                 var courierMarker = DG.marker(courier.location, {icon: carMarkerIcon}).addTo(this.map)
                 courier.marker = courierMarker

@@ -165,7 +165,7 @@ export default {
 }
 #showMapDestination {
     width: 100%;
-    height: 100%;
+    height: 95%;
     position: absolute !important; 
     z-index: 9; 
 }
