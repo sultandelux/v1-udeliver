@@ -15,7 +15,7 @@
 import LocationCard from '@/components/LocationCard';
 import Courier from '@/components/Courier/Courier'
 import gMap from '2gis-maps'
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 import carMarkerUrl from '@/assets/car-marker.png';
 import selectedCarMarkerUrl from '@/assets/selected-car-marker.png';
 import { config } from '@/config'
@@ -110,10 +110,10 @@ export default {
                 //     .setLatLng(map.getCenter())
                 //     .setContent('location not found')
                 //     .openOn(map);
-            });
+            })
         function onLocate(e){ 
-            const radius = e.accuracy / 5;
-            const radiusPoint = radius / 10;
+            const radius = e.accuracy / 5
+            const radiusPoint = radius / 10
             const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map);
             const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map);
             const zoomLocation = {
@@ -198,6 +198,8 @@ export default {
                 textDirection: 'auto'
             })
         }
+        this.getme()
+        console.log('thisgetme', this.getme())
     },
     methods: {
         setUserLocation(){
@@ -225,6 +227,7 @@ export default {
             )
         },
         ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
+        ...mapActions(['getme']),
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";

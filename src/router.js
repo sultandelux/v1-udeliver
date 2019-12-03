@@ -4,6 +4,8 @@ import Router from 'vue-router';
 import Profile from './views/Profile'
 import History from './views/History'
 import Login from './views/Login'
+import Code from './views/Code'
+
 import Register from './views/Register'
 import Information from './views/Information'
 import Mapcontainer from './components/Map'
@@ -42,6 +44,11 @@ const router = new Router({
             path: '/login',
             name: 'login',
             component: Login
+        },
+        {
+            path: '/code',
+            name: 'code',
+            component: Code
         },
         {
             path: '/register',

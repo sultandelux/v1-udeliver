@@ -9,6 +9,15 @@
                     <v-card-text>
                         <v-form ref="form" v-model="valid" lazy-validation>
                             <v-text-field
+                                name="nickname"
+                                label="Nickname"
+                                type="name"
+                                v-model="nickname"
+                                data-cy="registerNicknameField"
+                                required
+                            >
+                            </v-text-field>
+                            <v-text-field
                                 name="phone"
                                 label="Phone"
                                 type="phone"
@@ -18,24 +27,13 @@
                                 required
                             >
                             </v-text-field>
-                            <!-- <v-text-field
-                                prepend-icon="lock"
-                                name="password"
-                                label="Password"
-                                type="password"
-                                required
-                                v-model="password"
-                                :rules="passwordRules"
-                                data-cy="joinPasswordField"
-                            >
-                            </v-text-field> -->
                         </v-form>
                     </v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>
                         <v-btn
                             color="primary"
-                            :disabled="!valid"
+                            :disabled="!phone"
                             @click="submit"
                             data-cy="joinSubmitBtn"
                             >Register</v-btn
@@ -54,27 +52,23 @@ export default {
         return {
             valid: false,
             phone: '',
-            //  password: '',
+            nickname: '',
             phoneRules: [
-                v => !!v || 'Phone is required',
-                v => /.+@.+/.test(v) || 'Phone must be valid'
+                // v => !v || 'Phone is required',
+                // v => /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im.test(v) || 'Phone must be valid'
             ],
-            // passwordRules: [
-            //     v => !!v || 'Password is required',
-            //     v =>
-            //         v.length >= 6 ||
-            //         'Password must be greater than 6 characters'
-            // ]
         };
     },
     methods: {
         submit() {
-            if (this.$refs.form.validate()) {
-                this.$store.dispatch('userJoin', {
+            // if (this.$refs.form.validate()) {
+                this.$store.dispatch('signup', {
                     phone: this.phone,
-                    // password: this.password
+                    nickname: this.nickname
                 });
-            }
+                this.phone = ''
+                this.nickname = ''
+            // }
         }
     }
 };
