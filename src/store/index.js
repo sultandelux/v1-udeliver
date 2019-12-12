@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import axios from 'axios'
-import router from '@/router';
+import router from '@/router'
 
 Vue.use(Vuex);
 
@@ -25,7 +25,12 @@ export default new Vuex.Store({
         authenticated: false,
         authError: null,
         phone: '',
-        role: ''
+        userRole: {
+            is_courier: false,
+            is_customer: true
+        },
+        pickupSuggests: [],
+        destinationSuggests: [],
     },
     mutations: {
         setPickup({pickupLocation}, {address, lat, lng}){
@@ -50,10 +55,50 @@ export default new Vuex.Store({
 		},
 		AuthError(state, e) {
 			state.authError = e
-		}
+        },
+        emptyPickupSuggest(state){
+            state.pickupSuggests = []
+        }
     },
     actions: {
-		getme({ commit }) {
+        getPickupSuggests({commit, state}, {query}){
+            console.log('query', query)
+
+            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz`
+            const proxyurl = "https://cors-anywhere.herokuapp.com/"
+            console.log('url', url)
+            axios
+                .get(proxyurl + url)
+                .then(res => {
+                    state.pickupSuggests = []
+                    console.log('res suggests', res)
+                    res.data.predictions.forEach(p => {
+                        console.log('p', p)
+                        state.pickupSuggests.push(p.structured_formatting.main_text)
+                    })
+                    console.log('state.pickupSuggests', state.pickupSuggests)
+                })
+                .catch(({response}) => {
+                    console.log('response suggest', response)
+                })
+        },
+        getDestinationSuggests({commit, state}, {query}){
+            console.log('query', query)
+
+            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz`
+            const proxyurl = "https://cors-anywhere.herokuapp.com/"
+            console.log('url', url)
+            axios
+                .get(proxyurl + url)
+                .then(res => {
+                    console.log('res suggests', res)
+
+                })
+                .catch(({response}) => {
+                    console.log('response suggest', response)
+                })
+        },
+		getme({ commit, state }) {
             const url = `http://delprod.herokuapp.com/users/me/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             // let phone = state.phone
@@ -62,7 +107,18 @@ export default new Vuex.Store({
 				.get(proxyurl + url, {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
 				.then(res => {
                     // saveToken(res.data.key, res.data.uid, commit)
-                    console.log('rescode', res)
+                    console.log('getme AUTH', res)
+                    const status = res.status
+                    if(status == 200){
+                        commit('AuthUser')
+                        state.userRole = {
+                            is_courier: res.data.is_courier,
+                            is_customer: res.data.is_customer
+                        }
+                    }
+                    console.log('authenticated', state.authenticated)
+                    console.log('userRole', state.userRole)
+
                 })
 				.catch(({ response }) => {
 					commit('AuthError', response.data)
@@ -81,6 +137,8 @@ export default new Vuex.Store({
 				.then(res => {
                     saveToken(res.data.key, res.data.uid, commit)
                     console.log('rescode', res)
+                    router.push('/')
+                    console.log('authenticated', state.authenticated)
                 })
 				.catch(({ response }) => {
 					commit('AuthError', response.data)
@@ -123,6 +181,9 @@ export default new Vuex.Store({
         latlngDestination: state => [state.destinationLocation.lat, state.destinationLocation.lng],
         initialLocation: state => state.initialLocation.name,
         latlngInitial: state => [state.initialLocation.lat, state.initialLocation.lng],
+        userRole: state => state.userRole,
+        pickupSuggests: state => state.pickupSuggests,
+        destinationSuggests: state => state.destinationSuggests
     }
 })
 

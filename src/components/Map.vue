@@ -12,12 +12,12 @@
 </template>
 <script>
 /* eslint-disable */
-import LocationCard from '@/components/LocationCard';
+import LocationCard from '@/components/LocationCard'
 import Courier from '@/components/Courier/Courier'
 import gMap from '2gis-maps'
-import { mapGetters, mapMutations, mapActions } from 'vuex';
-import carMarkerUrl from '@/assets/car-marker.png';
-import selectedCarMarkerUrl from '@/assets/selected-car-marker.png';
+import { mapGetters, mapMutations, mapActions } from 'vuex'
+import carMarkerUrl from '@/assets/car-marker.png'
+import selectedCarMarkerUrl from '@/assets/selected-car-marker.png'
 import { config } from '@/config'
 
 const carMarkerIcon = L.icon({
@@ -66,7 +66,7 @@ export default {
             couriersLatLngs: []
     }},
     computed: {
-        ...mapGetters(['pickup', 'latlng']),
+        ...mapGetters(['pickup', 'latlng', 'userRole']),
          getValidcouriers() {
             return this.couriers.filter(courier => courier.location.lat != 0);
         }
@@ -119,7 +119,7 @@ export default {
             const zoomLocation = {
                 start:  map.getZoom(),
                 end: map.getZoom()
-            };
+            }
             map.on('zoomstart', function(e) { zoomLocation.start = map.getZoom() })
             map.on('zoomend', function(e) {
                 zoomLocation.end = map.getZoom()
@@ -199,7 +199,7 @@ export default {
             })
         }
         this.getme()
-        console.log('thisgetme', this.getme())
+        // console.log('thisgetme', this.getme())
     },
     methods: {
         setUserLocation(){
@@ -283,8 +283,8 @@ export default {
         },
 
         showcourierInformation(courier) {
-            courier.selected = !courier.selected;
-            courier.icon = courier.selected ? selectedCarMarkerIcon : carMarkerIcon;
+            courier.selected = !courier.selected
+            courier.icon = courier.selected ? selectedCarMarkerIcon : carMarkerIcon
         },
         setcouriersLocation(index) {
             this.couriers.forEach(courier => {
@@ -297,8 +297,8 @@ export default {
         },
 
         getRandomRoute(latitude, longitude) {
-            const startCoordinates = this.getRandomLocation(latitude, longitude);
-            const endCoordinates = this.getRandomLocation(latitude, longitude);
+            const startCoordinates = this.getRandomLocation(latitude, longitude)
+            const endCoordinates = this.getRandomLocation(latitude, longitude)
             fetch(
                 'https://api.openrouteservice.org/directions?api_key=' +
                 config.API_KEY +

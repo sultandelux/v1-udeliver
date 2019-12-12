@@ -13,22 +13,23 @@
          <v-text-field
           label="Your pickup location"
           editable
-          :value="pickup"
+          :value="pickupAddress"
+          v-model="pickupAddress"
         >
         </v-text-field>
-                <v-btn text color='green' small @click="openMapPickup = true">Show on map</v-btn>
-                 <v-list shaped class="list">
-                  <v-list-item-group v-model="item">
-                    <v-list-item
-                      v-for="(item, i) in items"
-                      :key="i"
-                    >
-                      <v-list-item-content>
-                        <v-list-item-title v-text="item.text"></v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-list-item-group>
-                </v-list>
+          <v-btn text color='green' small @click="openMapPickup = true">Show on map</v-btn>
+            <v-list shaped class="list">
+            <v-list-item-group v-model="item">
+              <v-list-item
+                v-for="(item, i) in items"
+                v-bind:key="i + item"
+              >
+                <v-list-item-content>
+                  <v-list-item-title v-text="item"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
         <v-card-actions>
           <v-btn text @click="dialogPickup = false">Close</v-btn>
           <v-spacer></v-spacer>
@@ -54,12 +55,11 @@
           <showMap :loaded='loaded' />
       </v-card>
     </v-dialog>
-    
   </div>
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 import showMap from './Map/showMap'
 export default {
   name: 'SearchPickup',
@@ -73,6 +73,7 @@ export default {
       dialogPickup: false,
       openMapPickup: false,
       item: 1,
+      pickupAddress: '',
       items: [
         { text: 'Masanchi 104,', },
         { text: 'Masanchi 93B',  },
@@ -81,19 +82,44 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pickup'])
-
+    ...mapGetters(['pickup', 'pickupSuggests']),
+    // pickupAddress: function(){
+    //   return this.pickup
+    // }
   },
   created(){
     console.log('searchpickup created')
   },
   watch: {
+    pickupAddress: function() {
+        console.log('this.pickupSuggests1', this.pickupSuggests)
+
+        console.log('changed', this.pickupAddress)
+        this.items = []
+        const query = this.pickupAddress
+        if(query.length >=  3){
+          this.getPickupSuggests({query})
+          // if(this.pickupSuggests.length > 0){
+            console.log('this.pickupSuggests', this.pickupSuggests)
+            this.pickupSuggests.forEach(p => {
+              this.item += 1
+              console.log('counter', this.item)
+              const item = {text: p}
+              console.log('item', p)
+              this.items.push(p)
+              console.log('this.items', this.items)
+            })
+        // }
+        console.log('p line list', this.items)
+        } else {
+          this.emptyPickupSuggest()
+        }    
+        this.items = this.items.splice(0, 7)   
+    },
   },
   
   mounted() {
     console.log('searchpickup mounted')
-
-
   },
   updated() {
     // console.log('searchpickup updated')
@@ -106,8 +132,13 @@ export default {
     console.log('searchpickup destroyed')
   },
   methods: {
+      ...mapMutations([ 'emptyPickupSuggest' ]),
+      ...mapActions(['getPickupSuggests']),
       onClose(){
         this.openMapPickup = false
+      },
+      onChange(){
+        console.log('event target')
       }
     }
 }

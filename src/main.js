@@ -4,9 +4,11 @@ import vuetify from './plugins/vuetify';
 import router from './router';
 import axios from 'axios'
 import store from './store/index'
+import VueCookie from 'vue-cookie'
 
 Vue.config.productionTip = false
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+Vue.use(VueCookie)
 
 new Vue({
   vuetify,
