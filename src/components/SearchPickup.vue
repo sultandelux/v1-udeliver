@@ -19,7 +19,7 @@
         </v-text-field>
           <v-btn text color='green' small @click="openMapPickup = true">Show on map</v-btn>
             <v-list shaped class="list">
-            <v-list-item-group v-model="item">
+            <v-list-item-group v-model="pickupAddress">
               <v-list-item
                 v-for="(item, i) in items"
                 v-bind:key="i + item"
@@ -75,17 +75,11 @@ export default {
       item: 1,
       pickupAddress: '',
       items: [
-        { text: 'Masanchi 104,', },
-        { text: 'Masanchi 93B',  },
-        { text: 'Masanchi 103A',  },
       ],
     }
   },
   computed: {
     ...mapGetters(['pickup', 'pickupSuggests']),
-    // pickupAddress: function(){
-    //   return this.pickup
-    // }
   },
   created(){
     console.log('searchpickup created')
@@ -102,8 +96,6 @@ export default {
           // if(this.pickupSuggests.length > 0){
             console.log('this.pickupSuggests', this.pickupSuggests)
             this.pickupSuggests.forEach(p => {
-              this.item += 1
-              console.log('counter', this.item)
               const item = {text: p}
               console.log('item', p)
               this.items.push(p)

@@ -2,12 +2,12 @@
 <div class="text-center">
     <template>
     <v-text-field
-          label="Your destination"
-          required
-          @focus="dialogDestination = true"
-          :value="destionationAddress"
+        label="Your destination"
+        required
+        @focus="dialogDestination = true"
+        :value="destination"
     >
-        </v-text-field>
+    </v-text-field>
     </template>
     <v-dialog v-model="dialogDestination" scrollable max-width="370px" class="listCard">
       <v-card>
@@ -16,18 +16,19 @@
           label="Your destination"
           required
           editable
-          :value="destionationAddress"
+          :value="destinationAddress"
+          v-model="destinationAddress"
         >
         </v-text-field>
           <v-btn text color='green' small @click="openMapDestination = true">Show on map</v-btn>
                 <v-list shaped class="list">
-                  <v-list-item-group v-model="item">
+                  <v-list-item-group v-model="destinationAddress">
                     <v-list-item
                       v-for="(item, i) in items"
                       :key="i"
                     >
                       <v-list-item-content>
-                        <v-list-item-title v-text="item.text"></v-list-item-title>
+                        <v-list-item-title v-text="item"></v-list-item-title>
                       </v-list-item-content>
                     </v-list-item>
                   </v-list-item-group>
@@ -62,7 +63,7 @@
 
 <script>
 import showMapDestination from './Map/showMapDestination'
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 
 export default {
   name: 'SearchDestination',
@@ -76,29 +77,43 @@ export default {
       dialogDestination: false,
       openMapDestination: false,
       item: 1,
+      destinationAddress: '',
       items: [
-        { text: 'Masanchi 104,', },
-        { text: 'Masanchi 93B',  },
-        { text: 'Masanchi 103A',  },
       ],
     }
   },
   computed: {
-    ...mapGetters(['destination']),
+    ...mapGetters(['destination', 'destinationSuggests']),
     ...mapGetters(['initialLocation']),
-    destionationAddress: function(){
-      return this.destination == this.initialLocation ? '' : this.destination
-    }
   },
   created(){
     console.log('SearchDestination created')
   },
   watch: {
+    destinationAddress: function() {
+        console.log('this.destinationSuggests', this.destinationSuggests)
+        console.log('changed', this.destinationAddress)
+        this.items = []
+        const query = this.destinationAddress
+        if(query.length >=  3){
+          this.getDestinationSuggests({query})
+          // if(this.pickupSuggests.length > 0){
+            console.log('this.pickupSuggests', this.destinationSuggests)
+            this.destinationSuggests.forEach(p => {
+              this.items.push(p)
+              console.log('this.items', this.items)
+            })
+        // }
+        console.log('p line list', this.items)
+        } else {
+          this.emptyDestinationSuggest()
+        }    
+        this.items = this.items.splice(0, 7)   
+    },
   },
   
   mounted() {
     console.log('SearchDestination mounted')
-
   },
   updated() {
     // console.log('SearchDestination updated')
@@ -111,13 +126,14 @@ export default {
     console.log('SearchDestination destroyed')
   },
   methods: {
+     ...mapMutations([ 'emptyDestinationSuggest' ]),
+      ...mapActions(['getDestinationSuggests']),
       onClose(){
         this.openMapDestination = false
       }
     }
 }
 </script>
-
 
 <style lang="scss">
 .list {

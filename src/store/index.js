@@ -58,6 +58,9 @@ export default new Vuex.Store({
         },
         emptyPickupSuggest(state){
             state.pickupSuggests = []
+        },
+        emptyDestinationSuggest(state){
+            state.destinationSuggests = []
         }
     },
     actions: {
@@ -91,8 +94,11 @@ export default new Vuex.Store({
             axios
                 .get(proxyurl + url)
                 .then(res => {
-                    console.log('res suggests', res)
-
+                    res.data.predictions.forEach(p => {
+                        console.log('p', p)
+                        state.destinationSuggests.push(p.structured_formatting.main_text)
+                    })
+                    console.log('state.pickupSuggests', state.destinationSuggests)
                 })
                 .catch(({response}) => {
                     console.log('response suggest', response)
