@@ -19,10 +19,11 @@
         </v-text-field>
           <v-btn text color='green' small @click="openMapPickup = true">Show on map</v-btn>
             <v-list shaped class="list">
-            <v-list-item-group v-model="pickupAddress">
+            <v-list-item-group v-model="item">
               <v-list-item
                 v-for="(item, i) in items"
                 v-bind:key="i + item"
+                v-on:click="onSelect(item)"
               >
                 <v-list-item-content>
                   <v-list-item-title v-text="item"></v-list-item-title>
@@ -33,7 +34,7 @@
         <v-card-actions>
           <v-btn text @click="dialogPickup = false">Close</v-btn>
           <v-spacer></v-spacer>
-          <v-btn text @click="dialogPickup = false">Done</v-btn>
+          <v-btn text @click="onSuggest()">Done</v-btn>
         </v-card-actions>
         </v-form>
       </v-card>
@@ -124,13 +125,24 @@ export default {
     console.log('searchpickup destroyed')
   },
   methods: {
-      ...mapMutations([ 'emptyPickupSuggest' ]),
+      ...mapMutations([ 'emptyPickupSuggest', 'setPickupSuggest' ]),
       ...mapActions(['getPickupSuggests']),
       onClose(){
         this.openMapPickup = false
+        console.log('map done')
       },
       onChange(){
-        console.log('event target')
+      },
+      onSuggest(){
+        if(this.pickupAddress !== ''){
+          const pickupAddress = this.pickupAddress
+          this.setPickupSuggest(pickupAddress)
+        }
+        this.dialogPickup = false
+      }, 
+      onSelect(item){
+        this.pickupAddress = item
+        console.log('item', item)
       }
     }
 }

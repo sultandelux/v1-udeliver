@@ -61,13 +61,20 @@ export default new Vuex.Store({
         },
         emptyDestinationSuggest(state){
             state.destinationSuggests = []
+        },
+        setPickupSuggest(state, suggest){
+            state.pickupLocation.name = suggest
+        },
+        setDestinationSuggest(state, suggest){
+            state.destinationLocation.name = suggest
+            console.log('state.destinationLocation.name', state.destinationLocation.name)
         }
     },
     actions: {
         getPickupSuggests({commit, state}, {query}){
             console.log('query', query)
 
-            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz`
+            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=1000&location=43.238949,76.889709&types=address&components=country:kz&city=Almaty`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             console.log('url', url)
             axios
@@ -88,7 +95,7 @@ export default new Vuex.Store({
         getDestinationSuggests({commit, state}, {query}){
             console.log('query', query)
 
-            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz`
+            const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz&city=Almaty`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             console.log('url', url)
             axios
@@ -182,14 +189,26 @@ export default new Vuex.Store({
 	},
     getters: {
         pickup: state => state.pickupLocation.name,
+        pickupLocation: state => state.pickupLocation,
         latlng: state => [state.pickupLocation.lat, state.pickupLocation.lng],
         destination: state => state.destinationLocation.name,
+        destinationLocation: state => state.destinationLocation,
         latlngDestination: state => [state.destinationLocation.lat, state.destinationLocation.lng],
         initialLocation: state => state.initialLocation.name,
         latlngInitial: state => [state.initialLocation.lat, state.initialLocation.lng],
         userRole: state => state.userRole,
-        pickupSuggests: state => state.pickupSuggests,
-        destinationSuggests: state => state.destinationSuggests
+        pickupSuggests: state => {
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+            return state.pickupSuggests.filter(onlyUnique)
+        },
+        destinationSuggests: state => {
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+            return state.destinationSuggests.filter(onlyUnique)
+        }
     }
 })
 

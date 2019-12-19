@@ -66,7 +66,7 @@ export default {
             couriersLatLngs: []
     }},
     computed: {
-        ...mapGetters(['pickup', 'latlng', 'userRole']),
+        ...mapGetters(['pickup', 'latlng', 'userRole', 'pickupLocation', 'destinationLocation']),
          getValidcouriers() {
             return this.couriers.filter(courier => courier.location.lat != 0);
         }
@@ -90,7 +90,6 @@ export default {
 
     },
     mounted() {
-        
         console.log('pickup', this.pickup)
         console.log('Map mounted')
         const DG = require('2gis-maps');
@@ -202,6 +201,8 @@ export default {
         // console.log('thisgetme', this.getme())
     },
     methods: {
+        ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
+        ...mapActions(['getme']),
         setUserLocation(){
             navigator.geolocation.getCurrentPosition(
             position => {
@@ -226,8 +227,6 @@ export default {
                 { timeout: 10000 }
             )
         },
-        ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
-        ...mapActions(['getme']),
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
@@ -244,25 +243,12 @@ export default {
 
                     const lat = this.markerLocation.getLatLng().lat
                     const lng = this.markerLocation.getLatLng().lng
-                    this.setPickup({address, lat, lng})
+                    if(this.pickupLocation.lat !== lat && this.pickupLocation.lng !== lng){
+                        console.log('this.pickupLocation', this.pickupLocation)
+                        console.log('latlng', lat, lng)
+                        this.setPickup({address, lat, lng})
+                    }
                 });
-        },
-        findNameDestination(lat, lng){
-            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
-            const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch( url)
-                .then(data => data.json())
-                .then(location => {
-                    const splittedAddress = location.display_name.split(',');
-                    const address =
-                        splittedAddress[1].trim() +
-                        ' ' +
-                        splittedAddress[0].trim() +
-                        ', ' +
-                        splittedAddress[2].trim();
-                    console.log('destionation set', address, lat, lng)
-                    this.setDestination({address, lat, lng})
-                })
         },
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
@@ -278,7 +264,11 @@ export default {
                         ', ' +
                         splittedAddress[2].trim();
                     console.log('setInitial', address, lat, lng)
-                    this.setInitialLocation({address, lat, lng})
+                     if(this.destinationLocation.lat !== lat && this.destinationLocation.lng !== lng){
+                        console.log('this.destinationLocation', this.destinationLocation)
+                        console.log('latlng', lat, lng)
+                        this.setInitialLocation({address, lat, lng})
+                    }
                 })
         },
 

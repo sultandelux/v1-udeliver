@@ -20,7 +20,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['initialLocation', 'latlngInitial']),
+    ...mapGetters(['initialLocation', 'latlngInitial', 'destinationLocation']),
     ...mapGetters(['destination', 'latlngDestination'])
 
   },
@@ -147,7 +147,11 @@ export default {
                   const lat = this.markerLocation.getLatLng().lat
                   const lng = this.markerLocation.getLatLng().lng
                   console.log('latlngDestination', address, lat, lng)
-                  this.setDestination({address, lat, lng})
+                    if(this.destinationLocation.lat !== lat && this.destinationLocation.lng !== lng){
+                        console.log('this.destinationLocation', this.destinationLocation)
+                        console.log('latlng', lat, lng)
+                        this.setDestination({address, lat, lng})
+                    }
               })
        },   
        

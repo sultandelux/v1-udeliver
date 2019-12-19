@@ -22,10 +22,11 @@
         </v-text-field>
           <v-btn text color='green' small @click="openMapDestination = true">Show on map</v-btn>
                 <v-list shaped class="list">
-                  <v-list-item-group v-model="destinationAddress">
+                  <v-list-item-group v-model="item">
                     <v-list-item
                       v-for="(item, i) in items"
                       :key="i"
+                      v-on:click="onSelect(item)"
                     >
                       <v-list-item-content>
                         <v-list-item-title v-text="item"></v-list-item-title>
@@ -36,7 +37,7 @@
         <v-card-actions>
           <v-btn text @click="dialogDestination = false">Close</v-btn>
           <v-spacer></v-spacer>
-          <v-btn text @click="dialogDestination = false">Done</v-btn>
+          <v-btn text @click="onSuggest()">Done</v-btn>
         </v-card-actions>
         </v-form>
       </v-card>
@@ -67,7 +68,6 @@ import { mapGetters, mapMutations, mapActions } from 'vuex';
 
 export default {
   name: 'SearchDestination',
-  // props: ['pickupLocation', 'destinationLocation'],
   components: {
     showMapDestination
   },
@@ -98,7 +98,7 @@ export default {
         if(query.length >=  3){
           this.getDestinationSuggests({query})
           // if(this.pickupSuggests.length > 0){
-            console.log('this.pickupSuggests', this.destinationSuggests)
+            console.log('this.destinationSuggests', this.destinationSuggests)
             this.destinationSuggests.forEach(p => {
               this.items.push(p)
               console.log('this.items', this.items)
@@ -126,10 +126,21 @@ export default {
     console.log('SearchDestination destroyed')
   },
   methods: {
-     ...mapMutations([ 'emptyDestinationSuggest' ]),
+      ...mapMutations([ 'emptyDestinationSuggest', 'setDestinationSuggest' ]),
       ...mapActions(['getDestinationSuggests']),
       onClose(){
         this.openMapDestination = false
+      },
+      onSuggest(){
+        if(this.destinationAddress !== ''){
+          const destinationAddress = this.destinationAddress
+          this.setDestinationSuggest(destinationAddress)
+        }
+        this.dialogDestination = false
+      }, 
+      onSelect(item){
+        this.destinationAddress = item
+        console.log('item', item)
       }
     }
 }
