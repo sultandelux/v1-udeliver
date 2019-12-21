@@ -24,7 +24,7 @@ app.get(/.*/, function (req, res) {
 // 	res.sendFile(path.join(__dirname, '../dist/index.html'))
 // })
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 
 //start a  HTTP server 
 server.listen(PORT, console.log(`Server Started on port: ${PORT}`));

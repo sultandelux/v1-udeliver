@@ -3,7 +3,7 @@
         <LocationCard
         :pickupLocation="pickup"
         />
-        <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh;">
+        <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh">
             <v-layout justify-center align-center column pa-5>
                 <div id="map"></div>
             </v-layout>
@@ -19,7 +19,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import carMarkerUrl from '@/assets/car-marker.png'
 import selectedCarMarkerUrl from '@/assets/selected-car-marker.png'
 import { config } from '@/config'
-import io from 'socket.io-client';
+import io from 'socket.io-client'
 
 const carMarkerIcon = L.icon({
   iconUrl: carMarkerUrl,
@@ -40,11 +40,10 @@ export default {
     data() {
         return {
             room:'none',
-            socket: io('localhost:8080'),
+            socket: io('localhost:5000'),
             coord:['5.3559', '100.3025'],
-
             haveUserLocation: false,
-            center: [43.238475, 76.911361],
+            center: null,
             location: {
                 lat: 43.23848,
                 lng: 76.91133
@@ -73,7 +72,7 @@ export default {
     computed: {
         ...mapGetters(['pickup', 'latlng', 'userRole', 'pickupLocation', 'destinationLocation']),
          getValidcouriers() {
-            return this.couriers.filter(courier => courier.location.lat != 0);
+            return this.couriers.filter(courier => courier.location.lat != 0)
         }
     },
     watch: {
@@ -93,25 +92,28 @@ export default {
             console.log('Map created')
             this.startLocation()
 
+
     },
     mounted() {
+        this.startLocation()
+
         console.log('pickup', this.pickup)
         console.log('Map mounted')
          //create socket 
       
       this.socket.on('message',(msg)=>{
-          console.log('msg:',msg);
-          console.log(this.coord);
+          console.log('msg:',msg)
+          console.log(this.coord)
 
       })
 
         //load coordinate from server
       this.socket.on('load:coords',(data)=>{
-          this.coord = data.coord; 
-          console.log('msg=load:',data);
-          console.log("Coord=>",this.coord);
+          this.coord = data.coord 
+          console.log('msg=load:',data)
+          console.log("Coord=>",this.coord)
       })
-        const DG = require('2gis-maps');
+        const DG = require('2gis-maps')
         if (this.map == null){
             var map = DG.map('map', {
                     'center': this.center,
@@ -127,13 +129,13 @@ export default {
                 // DG.popup()
                 //     .setLatLng(map.getCenter())
                 //     .setContent('location not found')
-                //     .openOn(map);
+                //     .openOn(map)
             })
         function onLocate(e){ 
             const radius = e.accuracy / 5
             const radiusPoint = radius / 10
-            const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map);
-            const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map);
+            const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map)
+            const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map)
             const zoomLocation = {
                 start:  map.getZoom(),
                 end: map.getZoom()
@@ -143,9 +145,9 @@ export default {
                 zoomLocation.end = map.getZoom()
                 const diff = zoomLocation.start - zoomLocation.end
                 if (diff > 0) {
-                    circlePoint.setRadius(circlePoint.getRadius() * 1.8);
+                    circlePoint.setRadius(circlePoint.getRadius() * 1.8)
                 } else if (diff < 0) {
-                    circlePoint.setRadius(circlePoint.getRadius() / 1.8);
+                    circlePoint.setRadius(circlePoint.getRadius() / 1.8)
                 }
             })
             const lat = map.getCenter().lat
@@ -155,11 +157,11 @@ export default {
         const lat = map.getCenter().lat
         const lng = map.getCenter().lng
 
-        DG.control.location({position: 'topright'}).addTo(map);
+        DG.control.location({position: 'topright'}).addTo(map)
         const iconLocation = DG.icon({
             iconUrl: require('../assets/location.png'),
             iconSize: [30, 30],
-        });
+        })
        
 
         //sets pickup marker 
@@ -179,7 +181,7 @@ export default {
             markerLocation.setLatLng(newLatLng)
             markerLocationCoord =  markerLocation.getLatLng()
             markerLocation.unbindLabel()
-        });
+        })
         this.map.on('moveend', DG.bind(onMoveend, this, true))
 
         // finds a new address when moveend
@@ -198,7 +200,7 @@ export default {
                 static: true, 
                 offset: [-90, -60],
                 textDirection: 'auto'
-            });
+            })
             this.markerLocation.setLatLng(this.latlng)
             this.map.setView(this.latlng, 17)
         }    
@@ -217,34 +219,19 @@ export default {
             })
         }
         this.getme()
-        // console.log('thisgetme', this.getme())
     },
     methods: {
         ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
         ...mapActions(['getme']),
-        sendLocation(e){
-        e.preventDefault()
-        //send coord
-        this.socket.emit('send:coords',{
-            user: this.user,
-            room: this.room,
-            coord: this.coord,
-        })
-        },
-        subscribe(e){
-            e.preventDefault();
-            this.socket.emit('subscribe',{
-                room:this.room,
-            })
-        },
+
         setUserLocation(){
             navigator.geolocation.getCurrentPosition(
             position => {
                 // this.location = {
                 //     lat: position.coords.latitude,
                 //     lng: position.coords.longitude
-                // };
-                this.haveUserLocation = true;
+                // }
+                this.haveUserLocation = true
             },
             () => {
                 // Didn't give the location
@@ -254,8 +241,8 @@ export default {
                     this.location = {
                         lat: location.latitude,
                         lng: location.longitude
-                    };
-                    this.haveUserLocation = true;
+                    }
+                    this.haveUserLocation = true
                 })
             },
                 { timeout: 10000 }
@@ -263,17 +250,17 @@ export default {
         },
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
-            const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch( url)
+            const proxyurl = "https://cors-anywhere.herokuapp.com/"
+            fetch( proxyurl + url)
                 .then(data => data.json())
                 .then(location => {
-                    const splittedAddress = location.display_name.split(',');
+                    const splittedAddress = location.display_name.split(',')
                     const address =
                         splittedAddress[1].trim() +
                         ' ' +
                         splittedAddress[0].trim() +
                         ', ' +
-                        splittedAddress[2].trim();
+                        splittedAddress[2].trim()
 
                     const lat = this.markerLocation.getLatLng().lat
                     const lng = this.markerLocation.getLatLng().lng
@@ -282,21 +269,21 @@ export default {
                         console.log('latlng', lat, lng)
                         this.setPickup({address, lat, lng})
                     }
-                });
+                })
         },
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
-            const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            fetch( url)
+            const proxyurl = "https://cors-anywhere.herokuapp.com/"
+            fetch( proxyurl + url )
                 .then(data => data.json())
                 .then(location => {
-                    const splittedAddress = location.display_name.split(',');
+                    const splittedAddress = location.display_name.split(',')
                     const address =
                         splittedAddress[1].trim() +
                         ' ' +
                         splittedAddress[0].trim() +
                         ', ' +
-                        splittedAddress[2].trim();
+                        splittedAddress[2].trim()
                     console.log('setInitial', address, lat, lng)
                      if(this.destinationLocation.lat !== lat && this.destinationLocation.lng !== lng){
                         console.log('this.destinationLocation', this.destinationLocation)
@@ -342,14 +329,14 @@ export default {
                         const latLng = L.latLng(geo[0], geo[1])
                         this.couriersLatLngs.push([latLng.lng, latLng.lat])
                     })
-                    this.setcouriersLocation(0);
+                    this.setcouriersLocation(0)
                 })
         },
         getRandomLocation(startLat, startLng) {
-            const maxLat = startLat + 0.01;
-            const minLat = startLat - 0.01;
-            const maxLng = startLng + 0.01;
-            const minLng = startLng - 0.01;
+            const maxLat = startLat + 0.01
+            const minLat = startLat - 0.01
+            const maxLng = startLng + 0.01
+            const minLng = startLng - 0.01
             return {
                 lat: Math.random() * (maxLat - minLat) + minLat,
                 lng: Math.random() * (maxLng - minLng) + minLng
@@ -358,11 +345,11 @@ export default {
         setCourier(){ 
             console.log('this.location', this.location)       
             this.getRandomRoute(this.location.lat, this.location.lng)
-            let index = 0;
+            let index = 0
             setInterval(() => {
                 index++
                 if (index == this.couriersLatLngs.length) {
-                    index = 0;
+                    index = 0
                 }
                 this.setcouriersLocation(index)
                 this.counter = index
@@ -393,7 +380,7 @@ export default {
     width: 100%;
     height: 100%;
     position: absolute !important; 
-    z-index: 9; 
+    z-index: 9;
 }
 .leaflet-marker-icon {
     position: absolute;
