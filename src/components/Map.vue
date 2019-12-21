@@ -40,16 +40,18 @@ export default {
     data() {
         return {
             room:'none',
-            socket: io('localhost:8080'),
+            // socket: io('localhost:8080'),
             coord:['5.3559', '100.3025'],
 
             haveUserLocation: false,
             center: [43.238475, 76.911361],
             location: {
-                lat: 43.23848,
-                lng: 76.91133
+                lat: null,
+                lng: null
             },
             markerLocation: null,
+            circleLocation: null,
+            circlePoint: null,
             errorStr:null,
             map: null,
             couriers: [
@@ -62,7 +64,7 @@ export default {
                         lng: 76.91133
                     },
                     icon: carMarkerIcon,
-                    fullName: 'Peter Gregon',
+                    fullName: 'Tima Deliver',
                     courierAddress: '',
                     pricePerKm: 1.68
                 }
@@ -92,32 +94,24 @@ export default {
     created() {
             console.log('Map created')
             this.startLocation()
+            this.setUserLocation()
+            
 
     },
     mounted() {
+                this.startLocation()
+
         console.log('pickup', this.pickup)
         console.log('Map mounted')
          //create socket 
       
-      this.socket.on('message',(msg)=>{
-          console.log('msg:',msg)
-          console.log(this.coord)
-
-      })
-
-        //load coordinate from server
-      this.socket.on('load:coords',(data)=>{
-          this.coord = data.coord 
-          console.log('msg=load:',data)
-          console.log("Coord=>",this.coord)
-      })
         const DG = require('2gis-maps')
         if (this.map == null){
             var map = DG.map('map', {
-                    'center': this.center,
-                    'zoom': 12,
-                    'zoomControl': false,
-                    'fullscreenControl': false,
+                'center': this.center,
+                'zoom': 12,
+                'zoomControl': false,
+                'fullscreenControl': false,
             })
         }
         map.locate({setView: true, watch: true})
@@ -132,8 +126,16 @@ export default {
         function onLocate(e){ 
             const radius = e.accuracy / 5
             const radiusPoint = radius / 10
-            const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map)
-            const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map)
+            if(!this.circleLocation){
+                const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map)
+                this.circleLocation = circleLocation
+                const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map)
+                this.circlePoint = circlePoint
+            }
+            else {
+                this.circlePoint.setLatLng(e.latlng)
+                this.circleLocation.setLatLng(e.latlng)
+            }
             const zoomLocation = {
                 start:  map.getZoom(),
                 end: map.getZoom()
@@ -142,15 +144,16 @@ export default {
             map.on('zoomend', function(e) {
                 zoomLocation.end = map.getZoom()
                 const diff = zoomLocation.start - zoomLocation.end
-                if (diff > 0) {
-                    circlePoint.setRadius(circlePoint.getRadius() * 1.8)
-                } else if (diff < 0) {
-                    circlePoint.setRadius(circlePoint.getRadius() / 1.8)
+                if (diff > 0 && this.circlePoint) {
+                    this.circlePoint.setRadius(this.circlePoint.getRadius() * 1.8)
+                } else if (diff < 0 && this.circlePoint) {
+                    this.circlePoint.setRadius(this.circlePoint.getRadius() / 1.8)
                 }
             })
             const lat = map.getCenter().lat
             const lng = map.getCenter().lng
             this.setInitial(lat, lng)
+            map.locate({setView: false})
         }
         const lat = map.getCenter().lat
         const lng = map.getCenter().lng
@@ -163,8 +166,12 @@ export default {
        
 
         //sets pickup marker 
+        // if(!this.markerLocation){
+        //     const markerLocation = DG.marker([this.location.lat, this.location.lng], { icon: iconLocation})
+        //         .addTo(map)
+        // }
         const markerLocation = DG.marker([lat, lng], { icon: iconLocation})
-            .addTo(map)
+                .addTo(map)
         this.map = map
         this.markerLocation = markerLocation
         let markerLocationCoord = this.markerLocation.getLatLng()
@@ -202,7 +209,9 @@ export default {
             this.markerLocation.setLatLng(this.latlng)
             this.map.setView(this.latlng, 17)
         }    
-        this.setCourier()
+        if(this.location.lat && this.location.lng){
+            this.setCourier()
+        }
     },
     updated() {
         console.log('Map updated')
@@ -225,10 +234,10 @@ export default {
         setUserLocation(){
             navigator.geolocation.getCurrentPosition(
             position => {
-                // this.location = {
-                //     lat: position.coords.latitude,
-                //     lng: position.coords.longitude
-                // }
+                this.location = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                }
                 this.haveUserLocation = true
             },
             () => {
@@ -249,7 +258,7 @@ export default {
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            fetch( url)
+            fetch( proxyurl + url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',')
@@ -272,7 +281,7 @@ export default {
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            fetch( url)
+            fetch( proxyurl+url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',')
