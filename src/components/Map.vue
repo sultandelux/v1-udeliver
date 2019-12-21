@@ -19,6 +19,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex'
 import carMarkerUrl from '@/assets/car-marker.png'
 import selectedCarMarkerUrl from '@/assets/selected-car-marker.png'
 import { config } from '@/config'
+import io from 'socket.io-client';
 
 const carMarkerIcon = L.icon({
   iconUrl: carMarkerUrl,
@@ -38,6 +39,10 @@ export default {
     },
     data() {
         return {
+            room:'none',
+            socket: io('localhost:8080'),
+            coord:['5.3559', '100.3025'],
+
             haveUserLocation: false,
             center: [43.238475, 76.911361],
             location: {
@@ -92,6 +97,20 @@ export default {
     mounted() {
         console.log('pickup', this.pickup)
         console.log('Map mounted')
+         //create socket 
+      
+      this.socket.on('message',(msg)=>{
+          console.log('msg:',msg);
+          console.log(this.coord);
+
+      })
+
+        //load coordinate from server
+      this.socket.on('load:coords',(data)=>{
+          this.coord = data.coord; 
+          console.log('msg=load:',data);
+          console.log("Coord=>",this.coord);
+      })
         const DG = require('2gis-maps');
         if (this.map == null){
             var map = DG.map('map', {
@@ -157,7 +176,7 @@ export default {
         
         this.map.on('move', function (e) {
             const newLatLng = this.getCenter()
-            markerLocation.setLatLng(newLatLng);
+            markerLocation.setLatLng(newLatLng)
             markerLocationCoord =  markerLocation.getLatLng()
             markerLocation.unbindLabel()
         });
@@ -203,6 +222,21 @@ export default {
     methods: {
         ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
         ...mapActions(['getme']),
+        sendLocation(e){
+        e.preventDefault()
+        //send coord
+        this.socket.emit('send:coords',{
+            user: this.user,
+            room: this.room,
+            coord: this.coord,
+        })
+        },
+        subscribe(e){
+            e.preventDefault();
+            this.socket.emit('subscribe',{
+                room:this.room,
+            })
+        },
         setUserLocation(){
             navigator.geolocation.getCurrentPosition(
             position => {
