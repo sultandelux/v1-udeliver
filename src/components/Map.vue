@@ -44,7 +44,7 @@ export default {
             coord:['5.3559', '100.3025'],
 
             haveUserLocation: false,
-            center: [43.238475, 76.911361],
+            center: [43.238475, 76.931361],
             location: {
                 lat: null,
                 lng: null
@@ -52,6 +52,7 @@ export default {
             markerLocation: null,
             circleLocation: null,
             circlePoint: null,
+            pulsatingMarker: null,
             errorStr:null,
             map: null,
             couriers: [
@@ -124,17 +125,36 @@ export default {
                 //     .openOn(map)
             })
         function onLocate(e){ 
-            const radius = e.accuracy / 5
-            const radiusPoint = radius / 10
-            if(!this.circleLocation){
-                const circleLocation = DG.circle(e.latlng, {radius, stroke: false, fillOpacity: 0.3}).addTo(map)
+            const radius = e.accuracy / 2
+            const radiusPoint = radius / 5
+            // const generatePulsatingMarker = function (radius, color) {
+            //     const cssStyle = `
+            //         width: ${radius}px;
+            //         height: ${radius}px;
+            //         background: ${color};
+            //         color: ${color};
+            //         box-shadow: 0 0 0 ${color};
+            //     `
+            //     return DG.divIcon({
+            //         html: `<span style="${cssStyle}" class="pulse"/>`,
+            //         className: ''
+            //     })
+            // }
+
+            // const pulsatingIcon = generatePulsatingMarker(10, 'green')
+
+            if(!this.circleLocation && !this.circlePoint && !this.pulsatingIcon){
+                const circleLocation = DG.circle(e.latlng, {radius, stroke: false, color:'green', fillOpacity: 0.2}).addTo(map)
                 this.circleLocation = circleLocation
-                const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.7}).addTo(map)
+                const circlePoint = DG.circle(e.latlng, {radius: radiusPoint, color: 'white', fill: true, fillColor: 'green', fillOpacity: 0.5}).addTo(map)
                 this.circlePoint = circlePoint
+                // const pulsatingMarker = DG.marker(e.latlng, {icon: pulsatingIcon}).addTo(map);
+                // this.pulsatingMarker = pulsatingMarker
             }
             else {
                 this.circlePoint.setLatLng(e.latlng)
                 this.circleLocation.setLatLng(e.latlng)
+                // this.pulsatingMarker.setLatLng(e.latlng)
             }
             const zoomLocation = {
                 start:  map.getZoom(),
@@ -145,9 +165,9 @@ export default {
                 zoomLocation.end = map.getZoom()
                 const diff = zoomLocation.start - zoomLocation.end
                 if (diff > 0 && this.circlePoint) {
-                    this.circlePoint.setRadius(this.circlePoint.getRadius() * 1.8)
+                    this.circlePoint.setRadius(this.circlePoint.getRadius() * 2)
                 } else if (diff < 0 && this.circlePoint) {
-                    this.circlePoint.setRadius(this.circlePoint.getRadius() / 1.8)
+                    this.circlePoint.setRadius(this.circlePoint.getRadius() / 1)
                 }
             })
             const lat = map.getCenter().lat
@@ -392,4 +412,23 @@ export default {
 .leaflet-marker-icon {
     position: absolute;
 }
+.pulse {
+    display: block;
+    border-radius: 50%;
+    cursor: pointer;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0;
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+  }
+  
 </style>
