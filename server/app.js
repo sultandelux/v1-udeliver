@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express');
 const app = express();
-const server = require('http').Server(app);
+const server = require('https').Server(app);
 const io = require('socket.io')(server);
 const serveStatic = require('serve-static')
 const path = require('path')
@@ -14,7 +14,7 @@ app.get(/.*/, function (req, res) {
 // app.use('/',require('./routes/index'))
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || v2-deliver.herokuapp.com;
 
 server.listen(PORT, console.log(`Server Started on port: ${PORT}`));
 
