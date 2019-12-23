@@ -70,7 +70,7 @@ export default {
             ],
             counter: 0,
             couriersLatLngs: [],
-            socket: io('v2-deliver.herokuapp.com'),
+            socket: io('v2-deliver.herokuapp.com:5000'),
             activeUsers: []
     }},
     computed: {

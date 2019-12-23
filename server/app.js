@@ -14,7 +14,7 @@ app.get(/.*/, function (req, res) {
 // app.use('/',require('./routes/index'))
 
 
-const PORT = process.env.PORT || v2-deliver.herokuapp.com;
+const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, console.log(`Server Started on port: ${PORT}`));
 
