@@ -93,14 +93,13 @@ export default {
         },
     },
     created() {
-            console.log('Map created')
-            this.startLocation()
-            this.setUserLocation()
-            
-
+        console.log('Map created')
+        this.startLocation()
+        this.setUserLocation()
     },
     mounted() {
-                this.startLocation()
+        this.startLocation()
+        this.subscribe()
 
         console.log('pickup', this.pickup)
         console.log('Map mounted')
@@ -200,13 +199,16 @@ export default {
         //     lat: this.markerLocation.getLatLng().lat,
         //     lng: this.markerLocation.getLatLng().lng
         // }
-        
-        this.map.on('move', function (e) {
-            const newLatLng = this.getCenter()
+        this.map.on('move', DG.bind(moveMap, this)) 
+
+        function moveMap(e){
+            const newLatLng = map.getCenter()
             markerLocation.setLatLng(newLatLng)
             markerLocationCoord =  markerLocation.getLatLng()
             markerLocation.unbindLabel()
-        })
+            this.coord = newLatLng
+        }
+
         this.map.on('moveend', DG.bind(onMoveend, this, true))
 
         // finds a new address when moveend
@@ -218,6 +220,7 @@ export default {
                 textDirection: 'auto'
             })
             this.findName()
+            this.sendLocation()
         }  
         if (this.pickup) {
             this.markerLocation.bindLabel(this.pickup, 
@@ -232,6 +235,57 @@ export default {
         if(this.location.lat && this.location.lng){
             this.setCourier()
         }
+        this.socket.on('message',(msg)=>{
+            console.log('msg:',msg);
+            console.log(this.coord);
+        })
+
+        //load coordinate from server
+      this.socket.on('load:coords',(data)=>{
+            this.coord = data.coord; 
+            console.log('coord =>', this.coord)
+            const iconLocation = DG.icon({
+                iconUrl: require('../assets/location.png'),
+                iconSize: [30, 30],
+            }) 
+            const user = data.user
+            console.log('user', user)
+
+            if(!this.activeUsers.some(el => el.user === user) && user !== this.socket.id){
+                let marker = DG.marker(data.coord, { icon: iconLocation}).addTo(this.map)
+                    .addTo(this.map)
+                console.log('user', user, marker)
+                const markerObject = {
+                    user: user,
+                    marker: marker
+                }
+                this.activeUsers.push(markerObject)
+            } 
+            if(this.activeUsers.some(el => el.user === user)){
+                this.activeUsers.map(el => {
+                    if(el.user === user) {
+                        el.marker.setLatLng(this.coord)
+                    }
+                })
+            }
+        })
+        this.socket.on('disconnectedUser', (user) => {
+          console.log('data userDisconnected' , user)
+          console.log('active users', this.activeUsers)
+
+        if(this.activeUsers.some(el => el.user === user)){
+            this.activeUsers.map(el => {
+                if(el.user === user) {
+                    console.log('SUCCESS')
+                    return el.marker ? el.marker.remove() : null
+                }
+            })
+        }
+          this.activeUsers = this.activeUsers.filter(el => {
+              return el.user != user
+          })
+          console.log('activeUsers', this.activeUsers)
+      })
     },
     updated() {
         console.log('Map updated')
@@ -392,6 +446,19 @@ export default {
                 function(error)   { console.error(error)},
                 {timeout: 1000*60, enableHighAccuracy: true, maximumAge: 1000*60*60} 
             )
+        },
+        sendLocation(){
+          console.log('sending')
+          this.socket.emit('send:coords',{
+              user: this.socket.id,
+              room: this.room,
+              coord: this.coord,
+          })
+        },
+        subscribe(e){
+            this.socket.emit('subscribe',{
+                room: this.room,
+            })
         }
     }
 }

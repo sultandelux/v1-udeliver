@@ -11,6 +11,9 @@ app.get(/.*/, function (req, res) {
 	res.sendFile(path.join(__dirname, '../dist/index.html'))
 })
 
+// app.use('/',require('./routes/index'))
+
+
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, console.log(`Server Started on port: ${PORT}`));
@@ -19,11 +22,11 @@ io.on('connect',(socket)=>{
     console.log("User " + socket.id + " connected to default ");
   
     socket.on("manual-disconnection", function(data) {
-        console.log("User Manually Disconnected. \n\t ID: " + data);
+        console.log("User Manually Disconnected.]\n\t ID: " + data);
     })
     socket.on('disconnect',(data)=>{
         console.log('User Disconnected', data, socket.id)
-        io.to('default').emit('disconnectedUser', `id ${socket.id}`)        
+        io.to('default').emit('disconnectedUser', socket.id)        
     })
     socket.on('subscribe',(data)=>{
         console.log(`User want to join: ${data.room}`)
