@@ -39,10 +39,8 @@ export default {
     },
     data() {
         return {
-            room:'none',
-            // socket: io('localhost:8080'),
-            coord:['5.3559', '100.3025'],
-
+            room:'default',
+            coord: [43.238475, 76.931361],
             haveUserLocation: false,
             center: [43.238475, 76.931361],
             location: {
@@ -71,7 +69,9 @@ export default {
                 }
             ],
             counter: 0,
-            couriersLatLngs: []
+            couriersLatLngs: [],
+            socket: io('localhost:5000'),
+            activeUsers: []
     }},
     computed: {
         ...mapGetters(['pickup', 'latlng', 'userRole', 'pickupLocation', 'destinationLocation']),
@@ -278,7 +278,7 @@ export default {
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            fetch( proxyurl + url)
+            fetch(  url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',')
@@ -301,7 +301,7 @@ export default {
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            fetch( proxyurl+url)
+            fetch( url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',')
