@@ -86,44 +86,22 @@ export default {
     ...mapGetters(['destination', 'destinationSuggests']),
     ...mapGetters(['initialLocation']),
   },
-  created(){
-    console.log('SearchDestination created')
-  },
   watch: {
     destinationAddress: function() {
-        console.log('this.destinationSuggests', this.destinationSuggests)
-        console.log('changed', this.destinationAddress)
         this.items = []
         const query = this.destinationAddress
         if(query.length >=  3){
           this.getDestinationSuggests({query})
           // if(this.pickupSuggests.length > 0){
-            console.log('this.destinationSuggests', this.destinationSuggests)
             this.destinationSuggests.forEach(p => {
               this.items.push(p)
-              console.log('this.items', this.items)
             })
         // }
-        console.log('p line list', this.items)
         } else {
           this.emptyDestinationSuggest()
         }    
         this.items = this.items.splice(0, 7)   
     },
-  },
-  
-  mounted() {
-    console.log('SearchDestination mounted')
-  },
-  updated() {
-    // console.log('SearchDestination updated')
-    console.log('destination', this.destination)
-  },
-  beforeDestroy(){
-    console.log('SearchDestination before destroy')
-  },
-  destroyed(){
-    console.log('SearchDestination destroyed')
   },
   methods: {
       ...mapMutations([ 'emptyDestinationSuggest', 'setDestinationSuggest' ]),
@@ -140,7 +118,6 @@ export default {
       }, 
       onSelect(item){
         this.destinationAddress = item
-        console.log('item', item)
       }
     }
 }

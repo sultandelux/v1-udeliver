@@ -22,9 +22,7 @@ export default {
     ...mapGetters(['pickup', 'latlng'])
 
   },
-  created(){
-    console.log('showmap created')
-  },
+
   watch: {
       pickup: function() {
         this.markerLocation.bindLabel(this.pickup, 
@@ -38,11 +36,9 @@ export default {
       }
   },
   mounted() {
-    console.log('showmap mounted')
 
     if(document.getElementById("showMap")){
         // document.getElementById('showMap').innerHTML = "<div id='map' style='width: 100%; height: 100%;'></div>";
-        console.log('pickup', this.pickup)
         const DG = require('2gis-maps');
         
         const map = DG.map('showMap', {
@@ -98,8 +94,6 @@ export default {
     }
   },
   updated() {
-    console.log('showmap updated')
-    console.log('loaded', this.pickup)
     if (this.pickup) {
         this.markerLocation.bindLabel(this.pickup, 
         { 
@@ -110,12 +104,7 @@ export default {
     }
     
   },
-  beforeDestroy(){
-    console.log('showmappicker before destroy')
-  },
-  destroyed(){
-    console.log('showmappicker destroyed')
-  },
+
   methods: {
       ...mapMutations(['setPickup']),
       findName: function() {

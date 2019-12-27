@@ -38,17 +38,12 @@ export default {
     ...mapGetters(['pickup', 'destination'])
   },
   mounted() {
-    console.log('mounted locationcard')
-
   },
   updated() {
-    console.log('show locationCard')
   },
   beforeDestroy(){
-    console.log('beforeDestroyed')
   },
   destroyed(){
-    console.log('destroyed')
   },
   methods: {
        setNavigation(){

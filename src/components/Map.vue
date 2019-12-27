@@ -13,7 +13,6 @@
 <script>
 /* eslint-disable */
 import LocationCard from '@/components/LocationCard'
-import Courier from '@/components/Courier/Courier'
 import gMap from '2gis-maps'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import carMarkerUrl from '@/assets/car-marker.png'
@@ -35,7 +34,6 @@ export default {
     name: 'mapcontainer',
     components: {
         LocationCard,
-        Courier
     },
     data() {
         return {
@@ -93,17 +91,12 @@ export default {
         },
     },
     created() {
-        console.log('Map created')
         this.startLocation()
         this.setUserLocation()
     },
     mounted() {
         this.startLocation()
         this.subscribe()
-
-        console.log('pickup', this.pickup)
-        console.log('Map mounted')
-         //create socket 
       
         const DG = require('2gis-maps')
         if (this.map == null){
@@ -236,25 +229,19 @@ export default {
             this.setCourier()
         }
         this.socket.on('message',(msg)=>{
-            console.log('msg:',msg);
-            console.log(this.coord);
         })
 
         //load coordinate from server
       this.socket.on('load:coords',(data)=>{
             this.coord = data.coord; 
-            console.log('coord =>', this.coord)
             const iconLocation = DG.icon({
                 iconUrl: require('../assets/location.png'),
                 iconSize: [30, 30],
             }) 
             const user = data.user
-            console.log('user', user)
-
             if(!this.activeUsers.some(el => el.user === user) && user !== this.socket.id){
                 let marker = DG.marker(data.coord, { icon: iconLocation}).addTo(this.map)
                     .addTo(this.map)
-                console.log('user', user, marker)
                 const markerObject = {
                     user: user,
                     marker: marker
@@ -270,13 +257,9 @@ export default {
             }
         })
         this.socket.on('disconnectedUser', (user) => {
-          console.log('data userDisconnected' , user)
-          console.log('active users', this.activeUsers)
-
         if(this.activeUsers.some(el => el.user === user)){
             this.activeUsers.map(el => {
                 if(el.user === user) {
-                    console.log('SUCCESS')
                     return el.marker ? el.marker.remove() : null
                 }
             })
@@ -284,12 +267,9 @@ export default {
           this.activeUsers = this.activeUsers.filter(el => {
               return el.user != user
           })
-          console.log('activeUsers', this.activeUsers)
       })
     },
     updated() {
-        console.log('Map updated')
-
         this.startLocation()
         if (this.pickup) {
             this.markerLocation.bindLabel(this.pickup, 
@@ -346,8 +326,6 @@ export default {
                     const lat = this.markerLocation.getLatLng().lat
                     const lng = this.markerLocation.getLatLng().lng
                     if(this.pickupLocation.lat !== lat && this.pickupLocation.lng !== lng){
-                        console.log('this.pickupLocation', this.pickupLocation)
-                        console.log('latlng', lat, lng)
                         this.setPickup({address, lat, lng})
                     }
                 })
@@ -365,10 +343,7 @@ export default {
                         splittedAddress[0].trim() +
                         ', ' +
                         splittedAddress[2].trim()
-                    console.log('setInitial', address, lat, lng)
                      if(this.destinationLocation.lat !== lat && this.destinationLocation.lng !== lng){
-                        console.log('this.destinationLocation', this.destinationLocation)
-                        console.log('latlng', lat, lng)
                         this.setInitialLocation({address, lat, lng})
                     }
                 })
@@ -424,7 +399,6 @@ export default {
             }
         },
         setCourier(){ 
-            console.log('this.location', this.location)       
             this.getRandomRoute(this.location.lat, this.location.lng)
             let index = 0
             setInterval(() => {
@@ -448,7 +422,6 @@ export default {
             )
         },
         sendLocation(){
-          console.log('sending')
           this.socket.emit('send:coords',{
               user: this.socket.id,
               room: this.room,

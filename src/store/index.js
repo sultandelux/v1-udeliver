@@ -42,7 +42,6 @@ export default new Vuex.Store({
             initialLocation.name = address
             initialLocation.lat = lat
             initialLocation.lng = lng
-            console.log('setInitialLocation', initialLocation)
         },
         setDestination({destinationLocation}, {address, lat, lng}){
             destinationLocation.name = address
@@ -67,60 +66,43 @@ export default new Vuex.Store({
         },
         setDestinationSuggest(state, suggest){
             state.destinationLocation.name = suggest
-            console.log('state.destinationLocation.name', state.destinationLocation.name)
         }
     },
     actions: {
         getPickupSuggests({commit, state}, {query}){
-            console.log('query', query)
-
             const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=1000&location=43.238949,76.889709&types=address&components=country:kz&city=Almaty`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            console.log('url', url)
             axios
                 .get(proxyurl + url)
                 .then(res => {
                     state.pickupSuggests = []
-                    console.log('res suggests', res)
                     res.data.predictions.forEach(p => {
-                        console.log('p', p)
                         state.pickupSuggests.push(p.structured_formatting.main_text)
                     })
-                    console.log('state.pickupSuggests', state.pickupSuggests)
                 })
                 .catch(({response}) => {
-                    console.log('response suggest', response)
                 })
         },
         getDestinationSuggests({commit, state}, {query}){
-            console.log('query', query)
-
             const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz&city=Almaty`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            console.log('url', url)
             axios
                 .get(proxyurl + url)
                 .then(res => {
                     res.data.predictions.forEach(p => {
-                        console.log('p', p)
                         state.destinationSuggests.push(p.structured_formatting.main_text)
                     })
-                    console.log('state.pickupSuggests', state.destinationSuggests)
                 })
                 .catch(({response}) => {
-                    console.log('response suggest', response)
                 })
         },
 		getme({ commit, state }) {
             const url = `http://delprod.herokuapp.com/users/me/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            // let phone = state.phone
-            // console.log('phone, code', )
 			axios 
 				.get(proxyurl + url, {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
 				.then(res => {
                     // saveToken(res.data.key, res.data.uid, commit)
-                    console.log('getme AUTH', res)
                     const status = res.status
                     if(status == 200){
                         commit('AuthUser')
@@ -129,8 +111,6 @@ export default new Vuex.Store({
                             is_customer: res.data.is_customer
                         }
                     }
-                    console.log('authenticated', state.authenticated)
-                    console.log('userRole', state.userRole)
 
                 })
 				.catch(({ response }) => {
@@ -141,7 +121,6 @@ export default new Vuex.Store({
             const url = `http://delprod.herokuapp.com/users/register/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             let phone = state.phone
-            console.log('phone, code', phone, code, state.phone)
 			axios 
 				.post(proxyurl + url, {
 					phone,
@@ -149,9 +128,7 @@ export default new Vuex.Store({
 				})
 				.then(res => {
                     saveToken(res.data.key, res.data.uid, commit)
-                    console.log('rescode', res)
                     router.push('/')
-                    console.log('authenticated', state.authenticated)
                 })
 				.catch(({ response }) => {
 					commit('AuthError', response.data)
@@ -161,7 +138,6 @@ export default new Vuex.Store({
             // axios.defaults.headers.post['Content-Type'] = 'application/json'
             const url = `http://delprod.herokuapp.com/users/phone/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
-            console.log('phone, nickname',)
 			axios
 				.post( proxyurl + url, {
                     phone,
@@ -170,12 +146,9 @@ export default new Vuex.Store({
                 )
 				.then(res => {
                     if(res){
-                        console.log('res', res)
                         // saveToken(res.data.token, commit)
-                        // console.log('resstatus', res, res.status, res.statusText)
                         const status = res.status
                         if(status == 200){
-                            console.log('status', status, this)
                             router.push('/code')
                         }
                     }
@@ -184,7 +157,6 @@ export default new Vuex.Store({
 					commit('AuthError', response.data)
                 })
             state.phone = phone
-            console.log('phone', state.phone)
 		}
 	},
     getters: {
@@ -219,5 +191,4 @@ function saveToken(token, uid, cb) {
     cb('AuthUser')
     const tokenS = localStorage.getItem('token')
     const uidS = localStorage.getItem('uid')
-    console.log('uid, token', tokenS, uidS, cb)
 }

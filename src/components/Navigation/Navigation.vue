@@ -29,21 +29,14 @@ export default {
     ...mapGetters(['destination', 'latlngDestination'])
 
   },
-  created(){
-    console.log('navigation created')
-  },
+
   watch: {
       polyline: function(){
         // const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
-        console.log('changed')
       },
   },
   mounted() {
-    console.log('navigation mounted')
-
     if(document.getElementById("navigation")){
-
-        
         const map = DG.map('navigation', {
             'center': this.center,
             'zoom': 12,
@@ -63,15 +56,7 @@ export default {
     }
   },
   updated() {
-        console.log('polyline updated', this.polyline.latLngs)
         const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
-  },
-  beforeDestroy(){
-    console.log('navigation before destroy')
-
-  },
-  destroyed(){
-    console.log('navigation destroyed')
   },
   methods: {
       ...mapMutations(['setDestination']),  
@@ -99,7 +84,6 @@ export default {
               const latLng = DG.latLng(geo[0], geo[1]);
               this.polyline.latLngs.push([latLng.lng, latLng.lat]);
             });
-            console.log('polyline', this.polyline.latLngs)
             const polyline = DG.polyline(this.polyline.latLngs).addTo(this.map)
             const iconPickup = DG.icon({
                 iconUrl: require('../../assets/location.png'),

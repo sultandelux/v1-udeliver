@@ -24,12 +24,9 @@ export default {
     ...mapGetters(['destination', 'latlngDestination'])
 
   },
-  created(){
-    console.log('showMapDestination created')
-  },
+
   watch: {
       destination: function() {
-          console.log('this.latlngDestination', this.latlngDestination)
         this.markerLocation.bindLabel(this.destination, 
         { 
             static: true, 
@@ -41,11 +38,9 @@ export default {
       },
   },
   mounted() {
-    console.log('showMapDestination mounted')
 
     if(document.getElementById("showMapDestination")){
         // document.getElementById('showMapDestination').innerHTML = "<div id='map' style='width: 100%; height: 100%;'></div>";
-        console.log('destination', this.destination)
         const DG = require('2gis-maps');
         
         const map = DG.map('showMapDestination', {
@@ -110,8 +105,6 @@ export default {
     }
   },
   updated() {
-    console.log('showMapDestination updated')
-    console.log('loaded', this.destination)
     if (this.destination) {
         this.markerLocation.bindLabel(this.destination, 
         { 
@@ -121,12 +114,6 @@ export default {
         });
     }
     
-  },
-  beforeDestroy(){
-    console.log('showMapDestinationpicker before destroy')
-  },
-  destroyed(){
-    console.log('showMapDestinationpicker destroyed')
   },
   methods: {
       ...mapMutations(['setDestination']),
@@ -146,10 +133,7 @@ export default {
 
                   const lat = this.markerLocation.getLatLng().lat
                   const lng = this.markerLocation.getLatLng().lng
-                  console.log('latlngDestination', address, lat, lng)
                     if(this.destinationLocation.lat !== lat && this.destinationLocation.lng !== lng){
-                        console.log('this.destinationLocation', this.destinationLocation)
-                        console.log('latlng', lat, lng)
                         this.setDestination({address, lat, lng})
                     }
               })

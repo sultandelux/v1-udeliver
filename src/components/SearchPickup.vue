@@ -82,54 +82,31 @@ export default {
   computed: {
     ...mapGetters(['pickup', 'pickupSuggests']),
   },
-  created(){
-    console.log('searchpickup created')
-  },
+
   watch: {
     pickupAddress: function() {
-        console.log('this.pickupSuggests1', this.pickupSuggests)
-
-        console.log('changed', this.pickupAddress)
         this.items = []
         const query = this.pickupAddress
         if(query.length >=  3){
           this.getPickupSuggests({query})
           // if(this.pickupSuggests.length > 0){
-            console.log('this.pickupSuggests', this.pickupSuggests)
             this.pickupSuggests.forEach(p => {
               const item = {text: p}
-              console.log('item', p)
               this.items.push(p)
-              console.log('this.items', this.items)
             })
         // }
-        console.log('p line list', this.items)
         } else {
           this.emptyPickupSuggest()
         }    
         this.items = this.items.splice(0, 7)   
     },
   },
-  
-  mounted() {
-    console.log('searchpickup mounted')
-  },
-  updated() {
-    // console.log('searchpickup updated')
-    // console.log('pickup', this.pickup)
-  },
-  beforeDestroy(){
-    console.log('searchpickup before destroy')
-  },
-  destroyed(){
-    console.log('searchpickup destroyed')
-  },
+
   methods: {
       ...mapMutations([ 'emptyPickupSuggest', 'setPickupSuggest' ]),
       ...mapActions(['getPickupSuggests']),
       onClose(){
         this.openMapPickup = false
-        console.log('map done')
       },
       onChange(){
       },
@@ -142,7 +119,6 @@ export default {
       }, 
       onSelect(item){
         this.pickupAddress = item
-        console.log('item', item)
       }
     }
 }
