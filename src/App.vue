@@ -1,6 +1,6 @@
 <template>
   <v-app id="app">
-      <app-navigation></app-navigation>
+      <!-- <app-navigation></app-navigation> -->
       <!-- <Menu /> -->
       <v-content transition="slide-x-transition">
           <router-view></router-view>

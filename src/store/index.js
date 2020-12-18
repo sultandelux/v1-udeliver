@@ -73,7 +73,7 @@ export default new Vuex.Store({
             const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=1000&location=43.238949,76.889709&types=address&components=country:kz&city=Almaty`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             axios
-                .get(proxyurl + url)
+                .get(url)
                 .then(res => {
                     state.pickupSuggests = []
                     res.data.predictions.forEach(p => {
@@ -87,7 +87,7 @@ export default new Vuex.Store({
             const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=AIzaSyD138HiMiI2oVTn5atvDzxSSH10w9ue584&radius=4000&location=43.238949,76.889709&types=address&components=country:kz&city=Almaty`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             axios
-                .get(proxyurl + url)
+                .get(url)
                 .then(res => {
                     res.data.predictions.forEach(p => {
                         state.destinationSuggests.push(p.structured_formatting.main_text)
@@ -97,10 +97,10 @@ export default new Vuex.Store({
                 })
         },
 		getme({ commit, state }) {
-            const url = `http://delprod.herokuapp.com/users/me/`
+            const url = `https://back.ontimeapp.club/users/me/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
 			axios 
-				.get(proxyurl + url, {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
+				.get(url, {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
 				.then(res => {
                     // saveToken(res.data.key, res.data.uid, commit)
                     const status = res.status
@@ -118,11 +118,11 @@ export default new Vuex.Store({
 				})
 		},
 		code({ commit, state }, { code }) {
-            const url = `http://delprod.herokuapp.com/users/register/`
+            const url = `https://back.ontimeapp.club/users/register/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
             let phone = state.phone
 			axios 
-				.post(proxyurl + url, {
+				.post(url, {
 					phone,
 					code
 				})
@@ -136,10 +136,10 @@ export default new Vuex.Store({
 		},
 		signup({ commit, state }, { phone, nickname}) {
             // axios.defaults.headers.post['Content-Type'] = 'application/json'
-            const url = `http://delprod.herokuapp.com/users/phone/`
+            const url = `https://back.ontimeapp.club/users/phone/`
             const proxyurl = "https://cors-anywhere.herokuapp.com/";
 			axios
-				.post( proxyurl + url, {
+				.post( url, {
                     phone,
                     nickname
                 },

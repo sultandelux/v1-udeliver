@@ -1,9 +1,9 @@
 require('dotenv').config()
-const express = require('express');
+const express = require('express')
 const app = express();
-
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const http = require('http')
+const server = http.createServer(app)
+const io = require('socket.io').listen(server)
 const serveStatic = require('serve-static')
 const path = require('path')
 
@@ -13,7 +13,7 @@ app.get(/.*/, function (req, res) {
 })
 
 // app.use('/',require('./routes/index'))
-
+const users = []
 
 const PORT = process.env.PORT || 5000;
 
@@ -23,7 +23,7 @@ io.on('connect',(socket)=>{
     console.log("User " + socket.id + " connected to default ");
   
     socket.on("manual-disconnection", function(data) {
-        console.log("User Manually Disconnected.]\n\t ID: " + data);
+        console.log("User Manuallßy Disconnected.]\n\t ID: " + data);
     })
     socket.on('disconnect',(data)=>{
         console.log('User Disconnected', data, socket.id)
@@ -38,10 +38,9 @@ io.on('connect',(socket)=>{
         console.log(`received:${data.coord}`)
         io.to(data.room).emit('load:coords',data)
     })
-    
 })
 
-const mySpace  = io.of('/new-namespace');
+const mySpace  = io.of('/new-namespace')
 mySpace.on('connection',function(socket){
     console.log('someone connected to new namespace');
     socket.emit('message',"socket 2");

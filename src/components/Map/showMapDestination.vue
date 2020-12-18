@@ -120,7 +120,7 @@ export default {
       findName: function() {
           const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
           const proxyurl = "https://cors-anywhere.herokuapp.com/";
-          fetch(proxyurl + url)
+          fetch(url)
               .then(data => data.json())
               .then(location => {
                   const splittedAddress = location.display_name.split(',');

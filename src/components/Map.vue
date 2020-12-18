@@ -1,8 +1,8 @@
 <template>
     <div class="mapcontainer">
-        <LocationCard
+        <!-- <LocationCard
         :pickupLocation="pickup"
-        />
+        /> -->
         <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh">
             <v-layout justify-center align-center column pa-5>
                 <div id="map"></div>
@@ -15,10 +15,11 @@
 import LocationCard from '@/components/LocationCard'
 import gMap from '2gis-maps'
 import { mapGetters, mapMutations, mapActions } from 'vuex'
-import carMarkerUrl from '@/assets/car-marker.png'
+import carMarkerUrl from '@/assets/transports/car.png'
 import selectedCarMarkerUrl from '@/assets/selected-car-marker.png'
 import { config } from '@/config'
 import io from 'socket.io-client'
+
 
 const carMarkerIcon = L.icon({
   iconUrl: carMarkerUrl,
@@ -40,7 +41,7 @@ export default {
             room:'default',
             coord: [43.238475, 76.931361],
             haveUserLocation: false,
-            center: [43.238475, 76.931361],
+                center: [43.238475, 76.931361],
             location: {
                 lat: null,
                 lng: null
@@ -68,7 +69,7 @@ export default {
             ],
             counter: 0,
             couriersLatLngs: [],
-            socket: io(window.location.hostname),
+            socket: io('https://map.ontimeapp.club'),
             activeUsers: []
     }},
     computed: {
@@ -91,11 +92,10 @@ export default {
         },
     },
     created() {
-        this.startLocation()
-        this.setUserLocation()
+        this.setUserLocation() 
     },
     mounted() {
-        this.startLocation()
+        // this.startLocation()
         this.subscribe()
       
         const DG = require('2gis-maps')
@@ -170,7 +170,7 @@ export default {
         const lat = map.getCenter().lat
         const lng = map.getCenter().lng
 
-        DG.control.location({position: 'topright'}).addTo(map)
+        DG.control.location({position: 'topright',drawCircle: false, follow: false, stopFollowingOnDrag: false }).addTo(map)
         const iconLocation = DG.icon({
             iconUrl: require('../assets/location.png'),
             iconSize: [30, 30],
@@ -188,10 +188,10 @@ export default {
         this.markerLocation = markerLocation
         let markerLocationCoord = this.markerLocation.getLatLng()
 
-        // this.location = {
-        //     lat: this.markerLocation.getLatLng().lat,
-        //     lng: this.markerLocation.getLatLng().lng
-        // }
+        this.location = {
+            lat: this.markerLocation.getLatLng().lat,
+            lng: this.markerLocation.getLatLng().lng
+        }
         this.map.on('move', DG.bind(moveMap, this)) 
 
         function moveMap(e){
@@ -270,7 +270,6 @@ export default {
       })
     },
     updated() {
-        this.startLocation()
         if (this.pickup) {
             this.markerLocation.bindLabel(this.pickup, 
             { 
@@ -279,7 +278,9 @@ export default {
                 textDirection: 'auto'
             })
         }
-        this.getme()
+        // this.getme()
+        // this.map.locate({setView: false})
+
     },
     methods: {
         ...mapMutations(['setPickup', 'setDestination', 'setInitialLocation']),
@@ -312,7 +313,7 @@ export default {
         findName: function() {
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${this.markerLocation.getLatLng().lat}&lon=${this.markerLocation.getLatLng().lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            fetch( proxyurl + url)
+            fetch(url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',')
@@ -333,7 +334,7 @@ export default {
         setInitial(lat, lng){
             const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             const proxyurl = "https://cors-anywhere.herokuapp.com/"
-            fetch(proxyurl + url)
+            fetch(url)
                 .then(data => data.json())
                 .then(location => {
                     const splittedAddress = location.display_name.split(',')
@@ -364,6 +365,15 @@ export default {
         },
 
         getRandomRoute(latitude, longitude) {
+            let header = new Headers({
+                'Access-Control-Allow-Origin':'*',
+                'Content-Type': 'application/json'
+            });
+            let sentData={
+                method: 'GET',
+                mode: 'cors',
+                header: header,
+            };
             const startCoordinates = this.getRandomLocation(latitude, longitude)
             const endCoordinates = this.getRandomLocation(latitude, longitude)
             fetch(
@@ -377,7 +387,8 @@ export default {
                 endCoordinates.lng +
                 ',' +
                 endCoordinates.lat +
-                '&profile=driving-car&geometry=true&geometry_format=polyline'
+                '&profile=driving-car&geometry=true&geometry_format=polyline',
+                sentData
                 )
                 .then(data => data.json())
                 .then(jsonData => {

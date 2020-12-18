@@ -3,6 +3,6 @@ module.exports = {
     "vuetify"
   ],
   devServer: {
-    proxy: 'http://delprod.herokuapp.com/', 
+    proxy: 'https://test.darintech.kz/', 
   },
 }
