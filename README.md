@@ -1,24 +1,5 @@
 # newdeliver1
 
-## Project setup
-```
-yarn install
-```
+map clone for indriver with 2gis, socket and openstreet api
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+![alt text](https://github.com/Newrichman/v1-udeliver/blob/master/2gisdata/main.png)
