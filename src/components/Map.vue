@@ -1,8 +1,8 @@
 <template>
     <div class="mapcontainer">
-        <!-- <LocationCard
+         <LocationCard
         :pickupLocation="pickup"
-        /> -->
+        />
         <v-container fluid fill-height class="mapcontainer" style="max-height: 100vh">
             <v-layout justify-center align-center column pa-5>
                 <div id="map"></div>
